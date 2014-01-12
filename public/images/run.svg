@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="800" height="90" viewBox="0 0 800 90">
+	<title>Hello World !</title>
+	<desc>Hello, This is the first world of SVG.</desc>
+	<defs>
+		<g id="car-wheel">
+			<circle r="12" stroke="#396180" stroke-width="3" fill="#98c8e7" cx="0" cy="0" />
+			<use xlink:href="#car-wheel-spokes" />
+			<circle r="2.5" stroke-width="0" fill="#396180" cx="0" cy="0" />
+		</g>
+		<g id="car-wheel-spokes">
+			<g>
+				<use xlink:href="#car-wheel-spoke" />
+			</g>
+			<g transform="rotate(45)">
+				<use xlink:href="#car-wheel-spoke" />
+			</g>
+			<g transform="rotate(90)">
+				<use xlink:href="#car-wheel-spoke" />
+			</g>
+			<g transform="rotate(135)">
+				<use xlink:href="#car-wheel-spoke" />
+			</g>
+		</g>
+		<g id="car-wheel-spoke">
+			<line x1="-12" y1="0" x2="12" y2="0" stroke="#396180" stroke-width="1" />
+		</g>
+	</defs>
+	<g transform="translate(650 0)">
+		<ellipse fill="#eeeeee" cx="90" cy="70" rx="72" ry="14">
+		</ellipse>
+		<path fill="#98c8e7" stroke="#396180" stroke-width="2" d="M 15 65 Q 5 40 55 35 Q 60 25 60 15 Q 145 5 135 65 Z">
+			<animateTransform attributeName="transform" attributeType="xml" type="translate" keyTimes="0;0.25;0.5;0.75;1" values="0 1;1 0;0 -1;-1 0;0 1" dur="400ms" repeatCount="indefinite" calcMode="linear" />
+		</path>
+		<use xlink:href="#car-wheel" x="45" y="63">
+			<animateTransform attributeName="transform" attributeType="xml" type="rotate" from="0 45 63" to="-360 45 63" begin="0" dur="2s" repeatCount="indefinite" />
+		</use>
+		<use xlink:href="#car-wheel" x="110" y="63">
+			<animateTransform attributeName="transform" attributeType="xml" type="rotate" from="0 110 63" to="-360 110 63" begin="0" dur="2s" repeatCount="indefinite" />
+		</use>
+		<animateTransform attributeName="transform" attributeType="xml" type="translate" from="800 0" to="-150 0" begin="0" dur="15s" repeatCount="indefinite" calcMode="linear" />
+	</g>
+</svg>

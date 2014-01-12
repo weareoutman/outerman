@@ -1,0 +1,20 @@
+extends ../layout.jade
+
+block vars
+  - var title = article.title
+
+block content
+  .container
+    h1= article.title
+    p.text-muted
+      | 作者: 
+      span= article.author
+      | &nbsp;
+      - var date = new Date(+ article.create_time)
+      span= date.getFullYear() + '年' + (date.getMonth() + 1) + '月' + date.getDate() + '日'
+      - var tags = article.tags && article.tags.split(',')
+      if tags
+        each tag in tags
+          | &nbsp;
+          a(href='/tags/' + tag)= tag
+    article= article.content

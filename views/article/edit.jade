@@ -1,0 +1,24 @@
+extends ../layout.jade
+
+block vars
+  - var title = update ? '修改文章: ' + article.title : '写一篇文章'
+
+block content
+  .container
+    form#formArticle(role='form', action=update ? '/article/' + article.uri : '/article', method='post')
+      .form-group
+        label(for='inputArticleTitle') 标题
+        input#inputArticleTitle.form-control(name='title', type='text', placeholder='标题', value=update ? article.title : '')
+      .form-group
+        label(for='textareaArticleContent') 内容
+        textarea#textareaArticleContent.form-control(name='content', rows='10', placeholder='内容')= update ? article.content : ''
+      .form-group
+        label(for='inputArticleUri') 链接名
+        input#inputArticleUri.form-control(name='uri', type='text', placeholder='链接名', value=update ? article.uri : '')
+      .form-group
+        label(for='inputTags') 标签
+        input#inputTags.form-control(name='tags', type='text', placeholder='标签', value=update ? article.tags : '')
+      input(name='author', type='hidden', value='wangshenwei')
+      if update
+        input(name='_method', type='hidden', value='put')
+      button.btn.btn-primary(type='submit') 提交

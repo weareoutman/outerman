@@ -1,0 +1,30 @@
+html, body {
+  height: 100%;
+}
+.wrapper {
+  min-height: 100%;
+  height: auto;
+  margin: 0 auto -40px;
+  padding: 0 0 40px;
+}
+.footer {
+  height: 40px;
+  background-color: #f5f5f5;
+}
+.footer footer {
+  line-height: 40px;
+}
+footer .pull-left a {
+  margin-left: 0.5em;
+}
+.navbar-header {
+  min-width: 300px;
+}
+.navbar-search {
+  float: left;
+  padding: 8px 0;
+  width: 220px;
+}
+.navbar-search .btn {
+  color: #777;
+}
