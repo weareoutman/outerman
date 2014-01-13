@@ -1,0 +1,16 @@
+extends ../layout.jade
+
+block vars
+  - var title = '文章列表'
+
+block content
+  .container
+    if list && list.length > 0
+      ul
+        each article in list
+          li:a(href='/aritcle/'+article.uri)= article.title
+            | &nsbp; 
+            - var date = new Date(+ article.create_time)
+            span.text-muted= date.getFullYear() + '年' + (date.getMonth() + 1) + '月' + date.getDate() + '日'
+    else
+      .well 还没有文章~
