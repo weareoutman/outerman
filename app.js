@@ -1,5 +1,6 @@
 var express = require('express')
   , app = express()
+  , user = require('./routes/user')
   , article = require('./routes/article')
   , auth = require('./routes/auth')
   , config = require('./config');
@@ -24,8 +25,12 @@ app.get('/', function(req, res){
   res.render('index');
 });
 
-app.get('/auth/weibo', auth.weibo, function(req, res){
-  res.send(res.locals.token);
+app.get('/auth/weibo', auth.weibo, user.fromWeibo, function(req, res){
+  res.send(req.user);
+});
+
+app.get('/auth/instagram', auth.instagram, user.fromInstagram, function(req, res){
+  res.send(req.user);
 });
 
 // 文章列表

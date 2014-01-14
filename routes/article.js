@@ -1,7 +1,7 @@
 // router article
 
 /*
-SET article:cursor [next_id]
+INCR article:cursor [next_id]
 HMSET article:id:[id] {
   id: [id],
   uri: [uri],
@@ -18,9 +18,9 @@ ZADD article:update_time [update_time] [id]
 SADD tag:[tag] [id]
 */
 
-var db = require('../lib/db'),
-  _ = require('underscore'),
-  KEYS = {
+var db = require('../lib/db')
+  , _ = require('underscore')
+  , KEYS = {
     CURSOR: 'article:cursor',
     LIST: 'article:list',
     UPDATE_TIME: 'article:update_time',
@@ -31,7 +31,7 @@ var db = require('../lib/db'),
       return 'article:uri:' + uri;
     },
     tag2id: function(tag) {
-      return 'article:tag:' + tag;
+      return 'article:tag:' + encodeURIComponent(tag);
     }
   };
 
