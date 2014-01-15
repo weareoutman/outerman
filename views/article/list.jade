@@ -8,7 +8,7 @@ block content
     if list && list.length > 0
       ul
         each article in list
-          li:a(href='/aritcle/'+article.uri)= article.title
+          li: a(href='/aritcle/'+article.uri)= article.title
             | &nsbp; 
             - var date = new Date(+ article.create_time)
             span.text-muted= date.getFullYear() + '年' + (date.getMonth() + 1) + '月' + date.getDate() + '日'

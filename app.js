@@ -25,7 +25,19 @@ app.get('/', function(req, res){
   res.render('index');
 });
 
+app.get('/auth', function(req, res){
+  res.render('auth');
+});
+
 app.get('/auth/weibo', auth.weibo, user.fromWeibo, function(req, res){
+  res.send(req.user);
+});
+
+app.get('/auth/qq', auth.qq, user.fromQq, function(req, res){
+  res.send(req.user);
+});
+
+app.get('/auth/tqq', auth.tqq, user.fromTqq, function(req, res){
   res.send(req.user);
 });
 

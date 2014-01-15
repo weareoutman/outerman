@@ -1,0 +1,12 @@
+extends ./layout.jade
+
+block vars
+  - var title = '登录'
+
+block content
+  .container
+    ul
+      li: a(href='https://api.weibo.com/oauth2/authorize?client_id=2220358949&response_type=code&redirect_uri=http://weihub.com/auth/weibo', rel='nofollow') 微博
+      li: a(href='https://graph.qq.com/oauth2.0/authorize?client_id=101008020&response_type=code&redirect_uri=http://weihub.com/auth/qq', rel='nofollow') QQ
+      li: a(href='https://open.t.qq.com/cgi-bin/oauth2/authorize?client_id=801418953&response_type=code&redirect_uri=http://weihub.com/auth/tqq&forcelogin=false', rel='nofollow') 腾讯微博
+      li: a(href='https://api.instagram.com/oauth/authorize/?client_id=7eeee18860fc451483a9adc8c2d10aa7&redirect_uri=http://weihub.com/auth/instagram&response_type=code', rel='nofollow') Instagram

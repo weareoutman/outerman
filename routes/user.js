@@ -4,8 +4,8 @@ INCR user:cursor [next_id]
 HMSET user:id:[id] {
   id: [id],
   email: [email],
-  name: [name],
-  domain: [domain],
+  username: [username],
+  fullname: [fullname],
   from: [from],
   is_admin: [is_admin]
 }
@@ -27,8 +27,8 @@ HMSET user:auth:[id] {
   expires_at: [expire_id]
 }
 SET user:email:[email] [id]
-SET user:name:[name] [id]
-SET user:domain:[domain] [id]
+SET user:name:[username] [id]
+# SET user:domain:[domain] [id]
 LPUSH user:list [id]
 SADD user:from:[from] [id]
 ZADD user:last_login_time [last_login_time] [id]
@@ -37,9 +37,11 @@ ZADD user:last_login_time [last_login_time] [id]
 var db = require('../lib/db')
   , _ = require('underscore')
   , weibo = require('../lib/weibo')
+  , tqq = require('../lib/tqq')
+  , qq = require('../lib/qq')
   , instagram = require('../lib/instagram')
   , FIELDS = {
-    BASE: ['id', 'email', 'name', 'domain', 'from', 'is_admin'],
+    BASE: ['id', 'email', 'username', 'fullname', 'from', 'is_admin'],
     MORE: ['avatar', 'avatar_sm', 'avatar_lg', 'gender', 'create_time', 'last_login_time'],
     AUTH: ['pswd', 'salt', 'sign', 'sign_salt', 'token', 'from_uid', 'expires_at']
   }
@@ -59,11 +61,8 @@ var db = require('../lib/db')
     email2id: function(email) {
       return 'user:email:' + encodeURIComponent(email);
     },
-    name2id: function(name) {
-      return 'user:name:' + encodeURIComponent(name);
-    },
-    domain2id: function(domain) {
-      return 'user:domain:' + encodeURIComponent(domain);
+    name2id: function(username) {
+      return 'user:name:' + encodeURIComponent(username);
     },
     from2id: function(from) {
       return 'user:from:' + from;
@@ -82,12 +81,79 @@ exports.fromWeibo = function(req, res, next){
       token: token.access_token,
       from_uid: data.idstr,
       expires_at: expires_at,
-      name: data.name,
-      domain: data.domain,
+      username: data.domain,
+      fullname: data.name,
       gender: data.gender,
       avatar: data.avatar_large,
       avatar_sm: data.profile_image_url,
       avatar_lg: data.avatar_hd
+    };
+    create(user, function(err, replies){
+      if (err) {
+        return next(err);
+      }
+      delete req.token;
+      req.user = user;
+      next();
+    });
+  });
+};
+
+exports.fromQq = function(req, res, next){
+  var token = req.token
+    , expires_at = Math.floor(Date.now() / 1e3) + (+ token.expires_in) * 1e3,
+    args = _.pick(token, 'access_token');
+  qq.api('me', args, function(err, data){
+    if (err) {
+      return next(err);
+    }
+    args.openid = data.openid;
+    qq.api('user/get_user_info', args, function(err, data) {
+      if (err) {
+        return next(err);
+      }
+      var user = {
+        from: 'qq',
+        token: token.access_token,
+        from_uid: args.openid,
+        expires_at: expires_at,
+        // username: data.name,
+        fullname: data.nickname,
+        gender: data.gender === '男' ? 'm' : 'f',
+        avatar: data.figureurl_qq_1,
+        avatar_sm: data.figureurl_qq_1,
+        avatar_lg: data.figureurl_qq_2
+      };
+      create(user, function(err, replies){
+        if (err) {
+          return next(err);
+        }
+        delete req.token;
+        req.user = user;
+        next();
+      });
+    });
+  });
+};
+
+exports.fromTqq = function(req, res, next){
+  var token = req.token
+    , expires_at = Math.floor(Date.now() / 1e3) + (+ token.expires_in) * 1e3;
+  tqq.api('user/info', _.pick(token, 'access_token', 'openid'), function(err, data) {
+    if (err) {
+      return next(err);
+    }
+    var user = {
+      from: 'tqq',
+      token: token.access_token,
+      from_uid: data.openid,
+      expires_at: expires_at,
+      username: data.name,
+      fullname: data.nick,
+      gender: data.sex === 1 ? 'm' : 'f',
+      avatar: data.head + '/120',
+      avatar_sm: data.head + '/50',
+      avatar_lg: data.head + '/180'
     };
     create(user, function(err, replies){
       if (err) {
@@ -107,10 +173,9 @@ exports.fromInstagram = function(req, res, next){
       from: 'instagram',
       token: token.access_token,
       from_uid: data.id,
-      name: data.full_name,
-      domain: data.username,
-      avatar: data.profile_picture,
-      avatar_sm: data.profile_picture
+      username: data.username,
+      fullname: data.full_name,
+      avatar: data.profile_picture
     };
   create(user, function(err, replies){
     if (err) {
@@ -136,11 +201,8 @@ function create(user, callback) {
     if (user.email) {
       multi.set(KEYS.email2id(user.email), id);
     }
-    if (user.name) {
-      multi.set(KEYS.name2id(user.name), id);
-    }
-    if (user.domain) {
-      multi.set(KEYS.domain2id(user.domain), id);
+    if (user.username) {
+      multi.set(KEYS.name2id(user.username), id);
     }
     if (user.from) {
       multi.sadd(KEYS.from2id(user.from), id);
