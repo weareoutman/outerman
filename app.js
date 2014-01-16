@@ -41,6 +41,10 @@ app.get('/auth/tqq', auth.tqq, user.fromTqq, function(req, res){
   res.send(req.user);
 });
 
+app.get('/auth/github', auth.github, user.fromGithub, function(req, res){
+  res.send(req.user);
+});
+
 app.get('/auth/instagram', auth.instagram, user.fromInstagram, function(req, res){
   res.send(req.user);
 });

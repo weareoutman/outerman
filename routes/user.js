@@ -39,6 +39,7 @@ var db = require('../lib/db')
   , weibo = require('../lib/weibo')
   , tqq = require('../lib/tqq')
   , qq = require('../lib/qq')
+  , github = require('../lib/github')
   , instagram = require('../lib/instagram')
   , FIELDS = {
     BASE: ['id', 'email', 'username', 'fullname', 'from', 'is_admin'],
@@ -121,7 +122,6 @@ exports.fromQq = function(req, res, next){
         fullname: data.nickname,
         gender: data.gender === '男' ? 'm' : 'f',
         avatar: data.figureurl_qq_1,
-        avatar_sm: data.figureurl_qq_1,
         avatar_lg: data.figureurl_qq_2
       };
       create(user, function(err, replies){
@@ -151,9 +151,35 @@ exports.fromTqq = function(req, res, next){
       username: data.name,
       fullname: data.nick,
       gender: data.sex === 1 ? 'm' : 'f',
-      avatar: data.head + '/120',
-      avatar_sm: data.head + '/50',
-      avatar_lg: data.head + '/180'
+      avatar: data.head + '/50',
+      avatar_sm: data.head + '/30',
+      avatar_lg: data.head + '/100'
+    };
+    create(user, function(err, replies){
+      if (err) {
+        return next(err);
+      }
+      delete req.token;
+      req.user = user;
+      next();
+    });
+  });
+};
+
+exports.fromGithub = function(req, res, next){
+  var token = req.token;
+  github.api('user', _.pick(token, 'access_token'), function(err, data) {
+    if (err) {
+      return next(err);
+    }
+    var user = {
+      from: 'github',
+      token: token.access_token,
+      from_uid: data.id,
+      username: data.login,
+      fullname: data.name,
+      email: data.email,
+      avatar: data.avatar_url
     };
     create(user, function(err, replies){
       if (err) {
