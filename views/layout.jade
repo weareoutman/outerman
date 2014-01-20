@@ -5,8 +5,8 @@ html
     meta(charset='utf-8')
     title= title
     meta(name='viewport', content='width=device-width, initial-scale=1.0')
-    link(rel='stylesheet', href='/css/bootstrap.min.css')
-    link(rel='stylesheet', href='/css/style.css')
+    link(rel='stylesheet', href='//c.weihub.com/css/bootstrap.min.css')
+    link(rel='stylesheet', href='//c.weihub.com/css/style.css')
     if styles
       each style in styles
         link(rel='stylesheet', href=style)
@@ -30,24 +30,28 @@ html
               input.form-control(type="search", name="q", autocapitalize="off", autocomplete='off', spellcheck='false', placeholder='搜索')
           .navbar-collapse.collapse
             ul.nav.navbar-nav.navbar-right
-              li: a(href='/article/') 文章
-              li: a(href='/snippet/') 片段
+              li: a(href='/article') 文章
+              if user
+                li: a(href='')= user.fullname
+                li: a(href='/signout') 退出
+              else 
+                li: a(href='/auth') 登录
       block content
     .footer
       .container
         footer
           .pull-left
             | &copy; WeiHub
+            a(href='//weibo.com/wangshenwei') 微博
             a(href='//github.com/weareoutman') GitHub
             a(href='//instagram.com/weareoutman') Instagram
-            a(href='//weibo.com/wangshenwei') 微博
           .pull-right
-            a(href='http://www.miibeian.gov.cn/', target='_blank', rel='nofollow') 粤ICP备12079626号
-    script(src='/js/jquery-1.10.2.min.js')
+            a(href='http://www.miibeian.gov.cn/', target='_blank') 粤ICP备12079626号
+    script(src='//c.weihub.com/js/jquery-1.10.2.min.js')
     //
-      script(src='/js/underscore-min.js')
-      script(src='/js/backbone-min.js')
-    script(src='/js/bootstrap.min.js')
+      script(src='//c.weihub.com/js/underscore-min.js')
+      script(src='//c.weihub.com/js/backbone-min.js')
+    script(src='//c.weihub.com/js/bootstrap.min.js')
     if scripts
       each srcipt in scripts
         script(src=script)

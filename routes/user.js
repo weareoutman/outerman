@@ -5,51 +5,45 @@ HMSET user:id:[id] {
   id: [id],
   email: [email],
   username: [username],
-  fullname: [fullname],
-  from: [from],
-  is_admin: [is_admin]
+  fullname: [fullname]
 }
 HMSET user:more:[id] {
+  gender: {gender},
   avatar: {avatar},
   avatar_sm: {avatar_sm},
   avatar_lg: {avatar_lg},
-  gender: {gender},
-  create_time: [create_time],
-  last_login_time: [last_login_time],
+  create_time: [create_time]
 }
 HMSET user:auth:[id] {
-  pswd: [pswd],
-  salt: [salt],
-  sign: [sign],
-  sign_salt: [sign_salt],
-  token: [token],
-  from_uid: {from_uid},
-  expires_at: [expire_id]
+  hash: [hash],
+  salt: [salt]
 }
-SET user:email:[email] [id]
-SET user:name:[username] [id]
-# SET user:domain:[domain] [id]
+HMSET user:(weibo|qq|github|instagram):auth:[id] {
+  token: [token],
+  from_uid: [from_uid],
+  expires_at: [exprires_at]
+}
+# SET user:email:[email] [id]
+# SET user:name:[username] [id]
+SET user:(weibo|qq|github|instagram):[from_uid] [id]
 LPUSH user:list [id]
 SADD user:from:[from] [id]
-ZADD user:last_login_time [last_login_time] [id]
+# SADD user:admin [id]
 */
 
 var db = require('../lib/db')
   , _ = require('underscore')
-  , weibo = require('../lib/weibo')
-  , tqq = require('../lib/tqq')
-  , qq = require('../lib/qq')
-  , github = require('../lib/github')
-  , instagram = require('../lib/instagram')
+  , crypto = require('crypto')
+  , SIGN_LEN = 128
+  , SIGN_ITE = 10000
   , FIELDS = {
-    BASE: ['id', 'email', 'username', 'fullname', 'from', 'is_admin'],
-    MORE: ['avatar', 'avatar_sm', 'avatar_lg', 'gender', 'create_time', 'last_login_time'],
-    AUTH: ['pswd', 'salt', 'sign', 'sign_salt', 'token', 'from_uid', 'expires_at']
+    BASE: ['id', 'email', 'username', 'fullname'],
+    MORE: ['gender', 'avatar', 'avatar_sm', 'avatar_lg', 'create_time'],
+    FROM: ['token', 'uid', 'expires_at']
   }
   , KEYS = {
     CURSOR: 'user:cursor',
     LIST: 'user:list',
-    LAST_LOGIN_TIME: 'user:last_login_time',
     id2user: function(id) {
       return 'user:id:' + id;
     },
@@ -59,185 +53,179 @@ var db = require('../lib/db')
     id2auth: function(id){
       return 'user:auth:' + id;
     },
-    email2id: function(email) {
+    id2from: function(id){
+      return 'user:from:' + id;
+    },
+    /*email2id: function(email) {
       return 'user:email:' + encodeURIComponent(email);
     },
-    name2id: function(username) {
-      return 'user:name:' + encodeURIComponent(username);
-    },
+    name2id: function(name) {
+      return 'user:name:' + encodeURIComponent(name);
+    },*/
     from2id: function(from) {
       return 'user:from:' + from;
+    },
+    fromUid2id: function(from, uid) {
+      return 'user:' + from + ':' + uid;
     }
   };
 
-exports.fromWeibo = function(req, res, next){
-  var token = req.token
-    , expires_at = Math.floor(Date.now() / 1e3) + token.expires_in * 1e3;
-  weibo.api('users/show', _.pick(token, 'access_token', 'uid'), function(err, data) {
+exports.check = function(req, res, next){
+  var user = req.user;
+  db.get(KEYS.fromUid2id(user.from, user.from_uid), function(err, id){
     if (err) {
       return next(err);
     }
-    var user = {
-      from: 'weibo',
-      token: token.access_token,
-      from_uid: data.idstr,
-      expires_at: expires_at,
-      username: data.domain,
-      fullname: data.name,
-      gender: data.gender,
-      avatar: data.avatar_large,
-      avatar_sm: data.profile_image_url,
-      avatar_lg: data.avatar_hd
-    };
-    create(user, function(err, replies){
+    if (id !== null) {
+      user.id = id;
+      return sign(req, res, next);
+    }
+    create(user, function(err){
       if (err) {
         return next(err);
       }
-      delete req.token;
-      req.user = user;
-      next();
+      sign(req, res, next);
     });
   });
 };
 
-exports.fromQq = function(req, res, next){
-  var token = req.token
-    , expires_at = Math.floor(Date.now() / 1e3) + (+ token.expires_in) * 1e3,
-    args = _.pick(token, 'access_token');
-  qq.api('me', args, function(err, data){
+exports.load = function(req, res, next){
+  console.log(req.session);
+  if (req.session.user) {
+    res.locals.user = req.session.user;
+    return next();
+  }
+  var uid = req.cookies.uid
+    , usign = req.cookies.usign
+    , usalt = req.cookies.usalt;
+  if (! (uid && usign && usalt)) {
+    return next();
+  }
+  db.hgetall(KEYS.id2auth(uid), function(err, data){
     if (err) {
       return next(err);
     }
-    args.openid = data.openid;
-    qq.api('user/get_user_info', args, function(err, data) {
+    if (! data || data.salt !== usalt) {
+      return next();
+    }
+    var sha1 = crypto.createHmac('sha1', usalt);
+    sha1.update(usign);
+    if (data.hash !== sha1.digest('base64')) {
+      return next();
+    }
+    getUser(uid, function(err, user){
       if (err) {
         return next(err);
       }
-      var user = {
-        from: 'qq',
-        token: token.access_token,
-        from_uid: args.openid,
-        expires_at: expires_at,
-        // username: data.name,
-        fullname: data.nickname,
-        gender: data.gender === '男' ? 'm' : 'f',
-        avatar: data.figureurl_qq_1,
-        avatar_lg: data.figureurl_qq_2
-      };
-      create(user, function(err, replies){
+      req.session.user = user;
+      res.locals.user = user;
+      next();
+    });
+    /*crypto.pbkdf2(usign, usalt, SIGN_ITE, SIGN_LEN, function(err, buf){
+      if (err) {
+        return next(err);
+      }
+      if (data.hash !== buf.toString('base64')) {
+        return next();
+      }
+      getUser(uid, function(err, user){
         if (err) {
           return next(err);
         }
-        delete req.token;
-        req.user = user;
+        res.locals.user = user;
         next();
       });
-    });
+    });*/
   });
 };
 
-exports.fromTqq = function(req, res, next){
-  var token = req.token
-    , expires_at = Math.floor(Date.now() / 1e3) + (+ token.expires_in) * 1e3;
-  tqq.api('user/info', _.pick(token, 'access_token', 'openid'), function(err, data) {
+function sign(req, res, next) {
+  var id = req.user.id;
+  crypto.randomBytes(SIGN_LEN, function(err, buf){
     if (err) {
       return next(err);
     }
-    var user = {
-      from: 'tqq',
-      token: token.access_token,
-      from_uid: data.openid,
-      expires_at: expires_at,
-      username: data.name,
-      fullname: data.nick,
-      gender: data.sex === 1 ? 'm' : 'f',
-      avatar: data.head + '/50',
-      avatar_sm: data.head + '/30',
-      avatar_lg: data.head + '/100'
-    };
-    create(user, function(err, replies){
+    var salt = buf.toString('base64');
+    crypto.randomBytes(SIGN_LEN, function(err, buf){
       if (err) {
         return next(err);
       }
-      delete req.token;
-      req.user = user;
-      next();
+      var pswd = buf.toString('base64')
+        , sha1 = crypto.createHmac('sha1', salt);
+      sha1.update(pswd);
+      db.hmset(KEYS.id2auth(id), {
+        hash: sha1.digest('base64'),
+        salt: salt
+      }, function(err, reply){
+        if (err) {
+          return next(err);
+        }
+        res.cookie('uid', '' + id);
+        res.cookie('usign', pswd);
+        res.cookie('usalt', salt);
+        next(null);
+      });
+      /*crypto.pbkdf2(pswd, salt, SIGN_ITE, SIGN_LEN, function(err, buf){
+        if (err) {
+          return next(err);
+        }
+        var hash = buf.toString('base64');
+        db.hmset(KEYS.id2auth(id), {
+          hash: hash,
+          salt: salt
+        }, function(err, reply){
+          if (err) {
+            return next(err);
+          }
+          res.cookie('uid', '' + id);
+          res.cookie('usign', pswd);
+          res.cookie('usalt', salt);
+          next(null);
+        });
+      });*/
     });
   });
-};
-
-exports.fromGithub = function(req, res, next){
-  var token = req.token;
-  github.api('user', _.pick(token, 'access_token'), function(err, data) {
-    if (err) {
-      return next(err);
-    }
-    var user = {
-      from: 'github',
-      token: token.access_token,
-      from_uid: data.id,
-      username: data.login,
-      fullname: data.name,
-      email: data.email,
-      avatar: data.avatar_url
-    };
-    create(user, function(err, replies){
-      if (err) {
-        return next(err);
-      }
-      delete req.token;
-      req.user = user;
-      next();
-    });
-  });
-};
-
-exports.fromInstagram = function(req, res, next){
-  var token = req.token,
-    data = token.user,
-    user = {
-      from: 'instagram',
-      token: token.access_token,
-      from_uid: data.id,
-      username: data.username,
-      fullname: data.full_name,
-      avatar: data.profile_picture
-    };
-  create(user, function(err, replies){
-    if (err) {
-      return next(err);
-    }
-    delete req.token;
-    req.user = user;
-    next();
-  });
-};
+}
 
 function create(user, callback) {
   db.incr(KEYS.CURSOR, function(err, id){
+    id = '' + id;
     user.id = id;
     var base = _.pick(user, FIELDS.BASE)
       , more = _.pick(user, FIELDS.MORE)
-      , auth = _.pick(user, FIELDS.AUTH)
+      , from = _.pick(user, FIELDS.FROM)
       , multi = db.multi();
     multi.hmset(KEYS.id2user(id), base);
     multi.hmset(KEYS.id2more(id), more);
-    multi.hmset(KEYS.id2auth(id), auth);
     multi.lpush(KEYS.LIST, id);
-    if (user.email) {
+    /*if (user.email) {
       multi.set(KEYS.email2id(user.email), id);
     }
     if (user.username) {
       multi.set(KEYS.name2id(user.username), id);
-    }
-    if (user.from) {
-      multi.sadd(KEYS.from2id(user.from), id);
-    }
-    multi.exec(function(err, replies){
+    }*/
+    // if (user.from) {
+    multi.hmset(KEYS.id2from(id), from);
+    multi.set(KEYS.fromUid2id(user.from, user.from_uid), id);
+    multi.sadd(KEYS.from2id(user.from), id);
+    // }
+    multi.exec(function(err){
       if (err) {
         return callback(err);
       }
-      callback(null, replies);
+      callback(null);
     });
+  });
+}
+
+function getUser(id, callback) {
+  var multi = db.multi();
+  multi.hgetall(KEYS.id2user(id));
+  multi.hgetall(KEYS.id2more(id));
+  multi.exec(function(err, replies){
+    if (err) {
+      return callback(err);
+    }
+    callback(null, _.extend.apply(_, replies));
   });
 }

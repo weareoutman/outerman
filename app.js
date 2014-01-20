@@ -1,91 +1,111 @@
 var express = require('express')
   , app = express()
+  , main = express()
+  , staticServer = express()
   , user = require('./routes/user')
+  , oauth = require('./lib/oauth')
   , article = require('./routes/article')
-  , auth = require('./routes/auth')
-  , config = require('./config');
+  , db = require('./lib/db')
+  , conf = require('./config');
 
-// app.enable('trust proxy');
-app.enable('case sensitive routing');
+var RedisStore = require('connect-redis')(express);
 
-app.use(express.logger('dev'));
-app.use(express.compress());
-// app.use(express.cookieParser());
-// app.use(express.bodyParser());
-app.use(express.json());
-app.use(express.urlencoded());
-// app.use(express.multipart());
+main.enable('case sensitive routing');
+main.use(express.logger('dev'));
+main.use(express.compress());
 
-app.use(app.router);
-app.use(express.static(__dirname + '/public'));
-app.set('views', __dirname + '/views');
-app.set('view engine', 'jade');
+main.use(express.favicon(__dirname + '/public/favicon.ico'));
 
-app.get('/', function(req, res){
+main.use(express.cookieParser(conf.cookie_secret));
+main.use(express.session({
+  key: 'usid',
+  store: new RedisStore({
+    client: db,
+    ttl: 21600 // 6小时
+  }),
+  secret: conf.cookie_secret
+}));
+
+// main.use(express.bodyParser());
+main.use(express.json());
+main.use(express.urlencoded());
+// main.use(express.multipart());
+main.use(express.methodOverride());
+
+main.set('views', __dirname + '/views');
+main.set('view engine', 'jade');
+
+main.get('/', user.load, function(req, res){
   res.render('index');
 });
 
-app.get('/auth', function(req, res){
+main.use(user.load);
+
+main.get('/auth', function(req, res){
   res.render('auth');
 });
 
-app.get('/auth/weibo', auth.weibo, user.fromWeibo, function(req, res){
-  res.send(req.user);
+oauth.list.forEach(function(from){
+  main.get('/auth/' + from, oauth[from].auth, user.check, function(req, res){
+    // res.send(req.user);
+    res.redirect('/');
+  });
 });
 
-app.get('/auth/qq', auth.qq, user.fromQq, function(req, res){
-  res.send(req.user);
-});
-
-app.get('/auth/tqq', auth.tqq, user.fromTqq, function(req, res){
-  res.send(req.user);
-});
-
-app.get('/auth/github', auth.github, user.fromGithub, function(req, res){
-  res.send(req.user);
-});
-
-app.get('/auth/instagram', auth.instagram, user.fromInstagram, function(req, res){
-  res.send(req.user);
+main.get('/signout', function(req, res){
+  req.session.destroy(function(err){
+    if (err) {
+      console.error(err);
+    }
+    res.clearCookie('uid');
+    res.clearCookie('usign');
+    res.clearCookie('usalt');
+    res.redirect('/');
+  });
 });
 
 // 文章列表
-app.get('/article', article.list, function(req, res){
+main.get('/article', article.list, function(req, res){
   res.render('article/list');
 });
 
 // 发表新文章
-app.get('/article/edit', function(req, res){
+main.get('/article/edit', function(req, res){
   res.render('article/edit');
 });
 
 // 修改文章
-app.get('/article/edit/:uri', article.load, function(req, res){
+main.get('/article/edit/:uri', article.load, function(req, res){
   res.locals.update = true;
   res.render('article/edit');
 });
 
 // 查看单篇文章
-app.get('/article/:uri', article.load, function(req, res){
+main.get('/article/:uri', article.load, function(req, res){
     res.render('article/article');
 });
 
 // 提交发表新文章
-app.post('/article', article.create, function(req, res){
+main.post('/article', article.create, function(req, res){
   res.redirect('/article/' + res.locals.article.uri);
 });
 
 // 提交修改文章
-app.put('/article/:uri', article.update, function(req, res){
+main.put('/article/:uri', article.update, function(req, res){
   res.redirect('/article/' + res.locals.article.uri);
 });
 
-/*app.get('/hello.txt', function(req, res){
-  var body = 'Hello World';
-  res.setHeader('Content-Type', 'text/plain');
-  res.setHeader('Content-Length', Buffer.byteLength(body));
-  res.end(body);
-});*/
+// 静态文件服务
+staticServer.enable('case sensitive routing');
+staticServer.use(express.logger('dev'));
+staticServer.use(express.compress());
+staticServer.use(express.static(__dirname + '/public', {
+  maxAge: 8.64e7 // 1天
+}));
 
-app.listen(config.port, config.host);
-console.log('[%s] Express started listen on %s:%s', new Date().toUTCString(), config.host, config.port);
+// app.enable('trust proxy');
+app.use(express.vhost('weihub.com', main));
+app.use(express.vhost('c.weihub.com', staticServer));
+
+app.listen(conf.port, conf.host);
+console.log('[%s] Express started listen on %s:%s', new Date().toUTCString(), conf.host, conf.port);
