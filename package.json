@@ -16,5 +16,8 @@
     "redis": "~0.10.0",
     "request": "~2.31.0",
     "connect-redis": "~1.4.6"
+  },
+  "devDependencies": {
+    "requirejs": "~2.1.10"
   }
 }
