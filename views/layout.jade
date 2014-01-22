@@ -5,8 +5,7 @@ html
     meta(charset='utf-8')
     title= title
     meta(name='viewport', content='width=device-width, initial-scale=1.0')
-    // link(rel='stylesheet', href='//c.weihub.com/css/bootstrap.min.css')
-    link(rel='stylesheet', href='//c.weihub.com/css/style.css')
+    link(rel='stylesheet', href='//c.weihub.com/css/style-built.css?bust=style.hqqre1co')
     if styles
       each style in styles
         link(rel='stylesheet', href=style)
@@ -47,17 +46,16 @@ html
             a(href='//instagram.com/weareoutman') Instagram
           .pull-right
             a(href='http://www.miibeian.gov.cn/', target='_blank') 粤ICP备12079626号
-    // script(src='//c.weihub.com/js/jquery-1.10.2.min.js')
-    //
-      script(src='//c.weihub.com/js/underscore-min.js')
-      script(src='//c.weihub.com/js/backbone-min.js')
-    // script(src='//c.weihub.com/js/bootstrap.min.js')
-    script.
-      var require = {
-        baseUrl: 'http://c.weihub.com/js/'
-      };
     script(src='//c.weihub.com/js/require.js')
-    script(src='//c.weihub.com/js/main-built.js')
+    script.
+      require.config({
+        baseUrl: '//c.weihub.com/js/',
+        urlArgs: 'bust=main.hqqre1cn',
+        paths: {
+          main: 'main-built'
+        }
+      });
+      require(['main']);
     if scripts
       each srcipt in scripts
         script(src=script)

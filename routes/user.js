@@ -90,7 +90,6 @@ exports.check = function(req, res, next){
 };
 
 exports.load = function(req, res, next){
-  console.log(req.session);
   if (req.session.user) {
     res.locals.user = req.session.user;
     return next();
@@ -121,21 +120,6 @@ exports.load = function(req, res, next){
       res.locals.user = user;
       next();
     });
-    /*crypto.pbkdf2(usign, usalt, SIGN_ITE, SIGN_LEN, function(err, buf){
-      if (err) {
-        return next(err);
-      }
-      if (data.hash !== buf.toString('base64')) {
-        return next();
-      }
-      getUser(uid, function(err, user){
-        if (err) {
-          return next(err);
-        }
-        res.locals.user = user;
-        next();
-      });
-    });*/
   });
 };
 
@@ -165,24 +149,6 @@ function sign(req, res, next) {
         res.cookie('usalt', salt);
         next(null);
       });
-      /*crypto.pbkdf2(pswd, salt, SIGN_ITE, SIGN_LEN, function(err, buf){
-        if (err) {
-          return next(err);
-        }
-        var hash = buf.toString('base64');
-        db.hmset(KEYS.id2auth(id), {
-          hash: hash,
-          salt: salt
-        }, function(err, reply){
-          if (err) {
-            return next(err);
-          }
-          res.cookie('uid', '' + id);
-          res.cookie('usign', pswd);
-          res.cookie('usalt', salt);
-          next(null);
-        });
-      });*/
     });
   });
 }

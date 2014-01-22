@@ -18,6 +18,7 @@
     "connect-redis": "~1.4.6"
   },
   "devDependencies": {
+    "grunt": "~0.4.2",
     "requirejs": "~2.1.10"
   }
 }

@@ -1,0 +1,7 @@
+{
+  "baseUrl": "public/js",
+  "mainConfigFile": "public/js/main.js",
+  "optimize": "uglify2",
+  "name": "main",
+  "out": "public/js/main-built.js"
+}
