@@ -2,6 +2,7 @@
   "baseUrl": "public/js",
   "mainConfigFile": "public/js/main.js",
   "optimize": "uglify2",
+  "preserveLicenseComments": false,
   "name": "main",
   "out": "public/js/main-built.js"
 }

@@ -13,4 +13,4 @@ require.config({
     }
   }
 });
-require(['bootstrap', 'backbone']);
+require(['bootstrap'/*, 'backbone'*/]);
