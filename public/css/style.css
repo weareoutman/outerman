@@ -1,3 +1,16 @@
+@import url('bootstrap.min.css');
+@import url('hljs-default.css');
+@import url('hljs-github.css');
+
+@font-face {
+  font-family: 'Audiowide';
+  src: url('../fonts/Audiowide.eot');
+  src: url('../fonts/Audiowide.eot?#iefix') format('embedded-opentype'), url('../fonts/Audiowide.woff') format('woff'), url('../fonts/Audiowide.ttf') format('truetype');
+}
+.navbar-brand {
+  font-family: 'Audiowide','Helvetica Neue',Helvetica,Arial,sans-serif;
+}
+
 html, body {
   height: 100%;
 }
@@ -18,7 +31,7 @@ footer .pull-left a {
   margin-left: 0.5em;
 }
 .navbar-header {
-  min-width: 300px;
+  min-width: 320px;
 }
 .navbar-search {
   float: left;
@@ -27,4 +40,9 @@ footer .pull-left a {
 }
 .navbar-search .btn {
   color: #777;
+}
+@media (max-width: 395px) {
+  .navbar-search {
+    width: 140px;
+  }
 }

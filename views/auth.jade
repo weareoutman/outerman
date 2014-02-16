@@ -1,0 +1,20 @@
+extends ./layout.jade
+
+block vars
+  - var title = '登录'
+
+block content
+  .container
+    p 使用社交账号登录：
+    p
+      a.btn.btn-default(href='https://api.weibo.com/oauth2/authorize?client_id=2220358949&response_type=code&redirect_uri=http://weihub.com/auth/weibo')
+        img(src='//c.weihub.com/images/weibo@2x.png', width='32', height='32')
+      | &nbsp; 
+      a.btn.btn-default(href='https://graph.qq.com/oauth2.0/authorize?client_id=101008020&response_type=code&redirect_uri=http://weihub.com/auth/qq')
+        img(src='//c.weihub.com/images/qq@2x.png', width='32', height='32')
+      | &nbsp; 
+      a.btn.btn-default(href='https://github.com/login/oauth/authorize?scope=user:email&client_id=a933f3052c7ff8adc036&redirect_uri=http://weihub.com/auth/github')
+        img(src='//c.weihub.com/images/github@2x.png', width='32', height='32')
+      | &nbsp; 
+      a.btn.btn-default(href='https://api.instagram.com/oauth/authorize/?client_id=7eeee18860fc451483a9adc8c2d10aa7&redirect_uri=http://weihub.com/auth/instagram&response_type=code')
+        img(src='//c.weihub.com/images/instagram@2x.png', width='32', height='32')
