@@ -8,6 +8,7 @@ HMSET article:id:[id] {
   author: [author],
   title: [title],
   content: [content],
+  html: [html],
   tags: [tags],
   create_time: [create_time],
   update_time: [update_time]
@@ -15,11 +16,13 @@ HMSET article:id:[id] {
 SET article:uri:[uri] [id]
 LPUSH article:list [id]
 ZADD article:update_time [update_time] [id]
-SADD tag:[tag] [id]
+SADD article:tag:[tag] [id]
 */
 
 var db = require('../lib/db')
   , _ = require('underscore')
+  , marked = require('marked')
+  , hljs = require('highlight.js')
   , KEYS = {
     CURSOR: 'article:cursor',
     LIST: 'article:list',
@@ -34,6 +37,36 @@ var db = require('../lib/db')
       return 'article:tag:' + encodeURIComponent(tag);
     }
   };
+
+marked.Renderer.prototype.code = function(code, lang, escaped) {
+  if (this.options.highlight) {
+    var out = this.options.highlight(code, lang);
+    if (out != null && out !== code) {
+      escaped = true;
+      code = out;
+    }
+  }
+
+  if (!lang) {
+    return '<pre><code>'
+      + (escaped ? code : escape(code, true))
+      + '\n</code></pre>';
+  }
+
+  return '<pre class="'
+    + this.options.langPrefix
+    + escape(lang, true)
+    + '"><code>'
+    + (escaped ? code : escape(code, true))
+    + '\n</code></pre>\n';
+};
+
+marked.setOptions({
+  langPrefix: 'hljs ',
+  highlight: function(code, lang){
+    return hljs.highlight(lang, code).value;
+  }
+});
 
 exports.list = function(req, res, next) {
   getArticleList(function(err, list){
@@ -111,37 +144,53 @@ function loadArticleByUri(uri, callback) {
   });
 }
 
+// Translate markdown to html
+function md2html(md, callback) {
+  marked(md, function(err, html){
+    if (err) {
+      return callback(err);
+    }
+    callback(null, html);
+  });
+}
+
 function createArticle(args, callback) {
   var data = _.pick(args, 'uri', 'author', 'title', 'content', 'tags')
     , tags = data.tags && data.tags.split(',');
   data.update_time = data.create_time = Date.now();
-  db.incr(KEYS.CURSOR, function(err, id){
+  md2html(data.content, function(err, html){
     if (err) {
       return callback(err);
     }
-    var keyId = KEYS.id2article(id);
-    db.hgetall(keyId, function(err, exist){
+    data.html = html;
+    db.incr(KEYS.CURSOR, function(err, id){
       if (err) {
         return callback(err);
       }
-      if (exist) {
-        return callback('id existed');
-      }
-      var multi = db.multi();
-      multi.hmset(keyId, data);
-      multi.set(KEYS.uri2id(data.uri), id);
-      multi.lpush(KEYS.LIST, id);
-      multi.zadd(KEYS.UPDATE_TIME, data.update_time, id);
-      if (tags && tags.length > 0) {
-        tags.forEach(function(tag, i){
-          multi.sadd(KEYS.tag2id(tag), id);
-        });
-      }
-      multi.exec(function(err){
+      var keyId = KEYS.id2article(id);
+      db.hgetall(keyId, function(err, exist){
         if (err) {
           return callback(err);
         }
-        callback(null, data);
+        if (exist) {
+          return callback('id existed');
+        }
+        var multi = db.multi();
+        multi.hmset(keyId, data);
+        multi.set(KEYS.uri2id(data.uri), id);
+        multi.lpush(KEYS.LIST, id);
+        multi.zadd(KEYS.UPDATE_TIME, data.update_time, id);
+        if (tags && tags.length > 0) {
+          tags.forEach(function(tag, i){
+            multi.sadd(KEYS.tag2id(tag), id);
+          });
+        }
+        multi.exec(function(err){
+          if (err) {
+            return callback(err);
+          }
+          callback(null, data);
+        });
       });
     });
   });
@@ -152,44 +201,50 @@ function updateArticle(oldUri, args, callback) {
     , tags = data.tags && data.tags.split(',')
     , keyOldUri2id = KEYS.uri2id(oldUri);
   data.update_time = Date.now();
-  db.get(keyOldUri2id, function(err, id){
+  md2html(data.content, function(err, html){
     if (err) {
       return callback(err);
     }
-    if (! id) {
-      return callback('article id not found');
-    }
-    var keyId = KEYS.id2article(id);
-    db.hgetall(keyId, function(err, exist){
+    data.html = html;
+    db.get(keyOldUri2id, function(err, id){
       if (err) {
         return callback(err);
       }
-      if (! exist) {
-        return callback('article not found');
+      if (! id) {
+        return callback('article id not found');
       }
-      var multi = db.multi()
-        , keyNewUri2id = KEYS.uri2id(data.uri)
-        , oldTags = exist.tags && exist.tags.split(',');
-      if (keyOldUri2id !== keyNewUri2id) {
-        multi.rename(keyOldUri2id, keyNewUri2id);
-      }
-      multi.hmset(keyId, data);
-      multi.zadd(KEYS.UPDATE_TIME, data.update_time, id);
-      if (oldTags && oldTags.length > 0) {
-        oldTags.forEach(function(tag, i){
-          multi.srem(KEYS.tag2id(tag), id);
-        });
-      }
-      if (tags && tags.length > 0) {
-        tags.forEach(function(tag, i){
-          multi.sadd(KEYS.tag2id(tag), id);
-        });
-      }
-      multi.exec(function(err){
+      var keyId = KEYS.id2article(id);
+      db.hgetall(keyId, function(err, exist){
         if (err) {
           return callback(err);
         }
-        callback(null, data);
+        if (! exist) {
+          return callback('article not found');
+        }
+        var multi = db.multi()
+          , keyNewUri2id = KEYS.uri2id(data.uri)
+          , oldTags = exist.tags && exist.tags.split(',');
+        if (keyOldUri2id !== keyNewUri2id) {
+          multi.rename(keyOldUri2id, keyNewUri2id);
+        }
+        multi.hmset(keyId, data);
+        multi.zadd(KEYS.UPDATE_TIME, data.update_time, id);
+        if (oldTags && oldTags.length > 0) {
+          oldTags.forEach(function(tag, i){
+            multi.srem(KEYS.tag2id(tag), id);
+          });
+        }
+        if (tags && tags.length > 0) {
+          tags.forEach(function(tag, i){
+            multi.sadd(KEYS.tag2id(tag), id);
+          });
+        }
+        multi.exec(function(err){
+          if (err) {
+            return callback(err);
+          }
+          callback(null, data);
+        });
       });
     });
   });

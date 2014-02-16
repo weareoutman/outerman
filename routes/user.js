@@ -18,16 +18,17 @@ HMSET user:auth:[id] {
   hash: [hash],
   salt: [salt]
 }
-HMSET user:(weibo|qq|github|instagram):auth:[id] {
+HMSET user:from:[id] {
   token: [token],
   from_uid: [from_uid],
   expires_at: [exprires_at]
 }
 # SET user:email:[email] [id]
 # SET user:name:[username] [id]
-SET user:(weibo|qq|github|instagram):[from_uid] [id]
+# SET user:(weibo|qq|github|instagram):[from_uid] [id]
 LPUSH user:list [id]
 SADD user:from:[from] [id]
+SET user:from:[id] [from]
 # SADD user:admin [id]
 */
 
@@ -39,7 +40,7 @@ var db = require('../lib/db')
   , FIELDS = {
     BASE: ['id', 'email', 'username', 'fullname'],
     MORE: ['gender', 'avatar', 'avatar_sm', 'avatar_lg', 'create_time'],
-    FROM: ['token', 'uid', 'expires_at']
+    FROM: ['token', 'from_uid', 'expires_at']
   }
   , KEYS = {
     CURSOR: 'user:cursor',
@@ -121,6 +122,13 @@ exports.load = function(req, res, next){
       next();
     });
   });
+};
+
+exports.restrict = function(req, res, next) {
+  if (! req.session.user || ! req.session.user.admin) {
+    return next('Forbidden');
+  }
+  next();
 };
 
 function sign(req, res, next) {

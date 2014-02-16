@@ -15,3 +15,7 @@ block content
             span.text-muted= date.getFullYear() + '年' + (date.getMonth() + 1) + '月' + date.getDate() + '日'
     else
       .well 还没有文章~
+    if user && user.admin
+      a.btn.btn-xs.btn-default(href='/article/edit')
+        span.glyphicon.glyphicon-plus
+        |  写文章

@@ -31,15 +31,14 @@ main.use(express.json());
 main.use(express.urlencoded());
 // main.use(express.multipart());
 main.use(express.methodOverride());
+main.use(user.load);
 
 main.set('views', __dirname + '/views');
 main.set('view engine', 'jade');
 
-main.get('/', user.load, function(req, res){
+main.get('/', function(req, res){
   res.render('index');
 });
-
-main.use(user.load);
 
 main.get('/auth', function(req, res){
   res.render('auth');
@@ -70,12 +69,12 @@ main.get('/article', article.list, function(req, res){
 });
 
 // 发表新文章
-main.get('/article/edit', function(req, res){
+main.get('/article/edit', user.restrict, function(req, res){
   res.render('article/edit');
 });
 
 // 修改文章
-main.get('/article/edit/:uri', article.load, function(req, res){
+main.get('/article/edit/:uri', user.restrict, article.load, function(req, res){
   res.locals.update = true;
   res.render('article/edit');
 });
@@ -86,12 +85,12 @@ main.get('/article/:uri', article.load, function(req, res){
 });
 
 // 提交发表新文章
-main.post('/article', article.create, function(req, res){
+main.post('/article', user.restrict, article.create, function(req, res){
   res.redirect('/article/' + res.locals.article.uri);
 });
 
 // 提交修改文章
-main.put('/article/:uri', article.update, function(req, res){
+main.put('/article/:uri', user.restrict, article.update, function(req, res){
   res.redirect('/article/' + res.locals.article.uri);
 });
 

@@ -1,4 +1,6 @@
 @import url('bootstrap.min.css');
+@import url('hljs-default.css');
+@import url('hljs-github.css');
 
 @font-face {
   font-family: 'Audiowide';
@@ -29,7 +31,7 @@ footer .pull-left a {
   margin-left: 0.5em;
 }
 .navbar-header {
-  min-width: 300px;
+  min-width: 320px;
 }
 .navbar-search {
   float: left;
