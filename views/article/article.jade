@@ -5,18 +5,20 @@ block vars
 
 block content
   .container
-    h1= article.title
-    p.text-muted
-      - var date = new Date(+ article.create_time)
-      span= date.getFullYear() + '年' + (date.getMonth() + 1) + '月' + date.getDate() + '日'
-      - var tags = article.tags && article.tags.split(',')
-      if tags
-        each tag in tags
-          | &nbsp;
-          a.label.label-default(href='#' + tag)= tag
-      if user && user.admin
-        | &nbsp;
-        a.btn.btn-xs.btn-default(href='/article/edit/' + article.uri)
-          span.glyphicon.glyphicon-edit
-          |  编辑
-    article!= article.html
+    .row
+      .col-md-8
+        h1= article.title
+        p.text-muted
+          - var date = new Date(+ article.create_time)
+          span= date.getFullYear() + '年' + (date.getMonth() + 1) + '月' + date.getDate() + '日'
+          - var tags = article.tags && article.tags.split(',')
+          if tags
+            each tag in tags
+              | &nbsp;
+              a.label.label-default(href='#' + tag)= tag
+          if user && user.admin
+            | &nbsp;
+            a.btn.btn-xs.btn-default(href='/article/edit/' + article.uri)
+              span.glyphicon.glyphicon-edit
+              |  编辑
+        article!= article.html
