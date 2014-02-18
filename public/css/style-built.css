@@ -258,11 +258,17 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 html, body {
   height: 100%;
 }
+blockquote p {
+  font-size: 100%;
+}
+.text-code {
+  font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
+}
 .wrapper {
   min-height: 100%;
   height: auto;
   margin: 0 auto -40px;
-  padding: 0 0 40px;
+  padding: 0 0 60px;
 }
 .footer {
   height: 40px;

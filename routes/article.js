@@ -64,7 +64,7 @@ marked.Renderer.prototype.code = function(code, lang, escaped) {
 marked.setOptions({
   langPrefix: 'hljs ',
   highlight: function(code, lang){
-    return hljs.highlight(lang, code).value;
+    return lang ? hljs.highlight(lang, code).value : hljs.highlightAuto(code).value;
   }
 });
 

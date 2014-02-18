@@ -14,6 +14,7 @@ var RedisStore = require('connect-redis')(express);
 
 main.enable('case sensitive routing');
 main.use(express.logger({
+  format: ':req[X-Real-IP] - - [:date] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" ":req[X-Forwarded-For]"',
   stream: mainLog
 }));
 main.use(express.compress());
@@ -102,6 +103,7 @@ main.put('/article/:uri', user.restrict, article.update, function(req, res){
 var staticServer = express();
 staticServer.enable('case sensitive routing');
 staticServer.use(express.logger({
+  format: ':req[X-Real-IP] - - [:date] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" ":req[X-Forwarded-For]"',
   stream: staticLog
 }));
 staticServer.use(express.compress());
