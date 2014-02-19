@@ -5,31 +5,36 @@ html
     meta(charset='utf-8')
     title= title
     meta(name='viewport', content='width=device-width, initial-scale=1.0')
-    link(rel='stylesheet', href='//c.weihub.com/css/style-built.css?bust=style.98b5364244')
+    link(rel='stylesheet', href='http://c.weihub.com/css/style-built.css?bust=style.f2fa17b592')
     if styles
       each style in styles
-        link(rel='stylesheet', href='//c.weihub.com/css/'+style)
+        link(rel='stylesheet', href='http://c.weihub.com/css/'+style)
     // HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries
     != '<!--[if lt IE 9]>'
-    != '<script src="//c.weihub.com/js/html5shiv.js"></script>'
-    != '<script src="//c.weihub.com/js/respond.min.js"></script>'
+    != '<script src="http://c.weihub.com/js/html5shiv.js"></script>'
+    != '<script src="http://c.weihub.com/js/respond.min.js"></script>'
     != '<![endif]-->'
   body
     .wrapper
-      .navbar.navbar-default.navbar-static-top(role='navigation')
+      header.navbar.navbar-default.navbar-static-top(role='banner')
         .container
           .navbar-header
             button.navbar-toggle(type='button', data-toggle='collapse', data-target='.navbar-collapse')
-              span.sr-only Toggle navigation
+              span.sr-only 切换导航
               span.icon-bar
               span.icon-bar
               span.icon-bar
-            a.navbar-brand(href="/") WeiHub
-            form.navbar-search(action="//www.google.com.hk/search", method="get")
-              input.form-control(type="search", name="q", autocapitalize="off", autocomplete='off', spellcheck='false', placeholder='搜索')
-          .navbar-collapse.collapse
+            a.navbar-brand(href='/') WeiHub
+          .navbar-collapse.collapse(role='navigation')
+            ul.nav.navbar-nav
+              if nav === 'article'
+                li.active: a(href='/article') 文章
+              else
+                li: a(href='/article') 文章
+            form.navbar-form.navbar-left(action='http://www.google.com.hk/search', method='get', role='search')
+              .form-group
+                input.form-control(type='search', name='q', autocapitalize='off', autocomplete='off', spellcheck='false', placeholder='搜索')
             ul.nav.navbar-nav.navbar-right
-              li: a(href='/article') 文章
               if user
                 li: a(href='')= user.fullname
                 li: a(href='/signout') 退出
@@ -41,15 +46,16 @@ html
         footer
           .pull-left
             | &copy; WeiHub
-            a(href='//weibo.com/wangshenwei') 微博
-            a(href='//github.com/weareoutman') GitHub
-            a(href='//instagram.com/weareoutman') Instagram
-          .pull-right
+            small.text-code.hidden-xs  [ˈweɪ·hʌb]
+            a(href='http://weibo.com/wangshenwei') 微博
+            a(href='https://github.com/weareoutman') GitHub
+            a(href='http://instagram.com/weareoutman') Instagram
+          .pull-right.hidden-xs
             a(href='http://www.miibeian.gov.cn/', target='_blank') 粤ICP备12079626号
-    script(src='//c.weihub.com/js/require.js')
+    script(src='http://c.weihub.com/js/require.js')
     script.
       require.config({
-        baseUrl: '//c.weihub.com/js/',
+        baseUrl: 'http://c.weihub.com/js/',
         urlArgs: 'bust=main.e6df498d91',
         paths: {
           main: 'main-built'

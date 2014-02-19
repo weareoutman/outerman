@@ -24,6 +24,9 @@ blockquote footer {
 textarea.text-code {
   word-break: break-all;
 }
+.jumbotron p {
+  font-size: 18px;
+}
 .wrapper {
   min-height: 100%;
   height: auto;
@@ -39,20 +42,4 @@ textarea.text-code {
 }
 footer .pull-left a {
   margin-left: 0.5em;
-}
-.navbar-header {
-  min-width: 320px;
-}
-.navbar-search {
-  float: left;
-  padding: 8px 0;
-  width: 220px;
-}
-.navbar-search .btn {
-  color: #777;
-}
-@media (max-width: 395px) {
-  .navbar-search {
-    width: 140px;
-  }
 }
