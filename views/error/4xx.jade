@@ -1,0 +1,14 @@
+extends ../layout.jade
+
+block vars
+  - var title = '出错了'
+
+block content
+  .container
+    .alert.alert-warning
+      strong= '出错了！'
+      = error
+      |  
+      a.btn.btn-xs.btn-link(href='/')
+        span.glyphicon.glyphicon-home
+        |  返回首页

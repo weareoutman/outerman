@@ -23,7 +23,7 @@ main.use(express.favicon(__dirname + '/public/favicon.ico'));
 
 main.use(express.cookieParser(conf.cookie_secret));
 main.use(express.session({
-  key: 'usid',
+  key: 'ssid',
   store: new RedisStore({
     client: db,
     ttl: 21600 // 6小时
@@ -38,6 +38,14 @@ main.use(express.urlencoded());
 main.use(express.methodOverride());
 main.use(user.load);
 
+main.use(main.router);
+// Error handler
+main.use(function(err, req, res, next){
+  var status = err.status || 500;
+  res.status(status);
+  res.render('error/4xx', {error: err});
+});
+
 main.set('views', __dirname + '/views');
 main.set('view engine', 'jade');
 
@@ -47,17 +55,21 @@ main.get('/', function(req, res){
 
 main.get('/robots.txt', function(req, res){
   res.sendfile(__dirname + '/public/robots.txt', {
-    maxAge: 8.64e7 // 1 day
+    maxAge: 8.64e7 // 1天
   });
 });
 
 main.get('/auth', function(req, res){
+  var url = req.query.url || '/'
+    , state = Math.random().toString(36).replace('.', '');
+  req.session.state = state;
+  res.locals.state = encodeURIComponent(state + '.' + url);
   res.render('auth');
 });
 
 oauth.list.forEach(function(from){
-  main.get('/auth/' + from, oauth[from].auth, user.check, function(req, res){
-    res.redirect('/');
+  main.get('/auth/' + from, oauth.before, oauth[from].auth, user.check, function(req, res){
+    res.redirect(req.redirectUrl);
   });
 });
 

@@ -152,9 +152,10 @@ function sign(req, res, next) {
         if (err) {
           return next(err);
         }
-        res.cookie('uid', '' + id);
-        res.cookie('usign', pswd);
-        res.cookie('usalt', salt);
+        var month = 2.592e9;
+        res.cookie('uid', '' + id, { maxAge: month });
+        res.cookie('usign', pswd, { maxAge: month });
+        res.cookie('usalt', salt, { maxAge: month });
         next(null);
       });
     });
