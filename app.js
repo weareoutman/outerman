@@ -116,6 +116,13 @@ main.put('/article/:uri', user.restrict, article.update, function(req, res){
   res.redirect('/article/' + res.locals.article.uri);
 });
 
+// 404
+main.use(function(req, res, next){
+  var err = new Error('Not Found');
+  err.status = 404;
+  next(err);
+});
+
 // 静态文件服务
 var staticServer = express();
 staticServer.enable('case sensitive routing');
