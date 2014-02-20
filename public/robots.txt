@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /auth/weibo
+Disallow: /auth/qq
+Disallow: /auth/github
+Disallow: /auth/instagram

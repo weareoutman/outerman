@@ -45,13 +45,18 @@ main.get('/', function(req, res){
   res.render('index');
 });
 
+main.get('/robots.txt', function(req, res){
+  res.sendfile(__dirname + '/public/robots.txt', {
+    maxAge: 8.64e7 // 1 day
+  });
+});
+
 main.get('/auth', function(req, res){
   res.render('auth');
 });
 
 oauth.list.forEach(function(from){
   main.get('/auth/' + from, oauth[from].auth, user.check, function(req, res){
-    // res.send(req.user);
     res.redirect('/');
   });
 });
