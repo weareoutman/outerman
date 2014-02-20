@@ -39,6 +39,12 @@ main.use(express.methodOverride());
 main.use(user.load);
 
 main.use(main.router);
+// 404
+main.use(function(req, res, next){
+  var err = new Error('Not Found');
+  err.status = 404;
+  next(err);
+});
 // Error handler
 main.use(function(err, req, res, next){
   var status = err.status || 500;
@@ -114,13 +120,6 @@ main.post('/article', user.restrict, article.create, function(req, res){
 // 提交修改文章
 main.put('/article/:uri', user.restrict, article.update, function(req, res){
   res.redirect('/article/' + res.locals.article.uri);
-});
-
-// 404
-main.use(function(req, res, next){
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
 });
 
 // 静态文件服务
