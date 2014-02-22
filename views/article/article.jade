@@ -1,7 +1,7 @@
 extends ../layout.jade
 
 block vars
-  - var title = article.title
+  - var title = article.title + ' - WeiHub'
   - var nav = 'article'
 
 block content
@@ -10,12 +10,15 @@ block content
       .col-md-8.col-md-offset-2.article-container
         h1.article-title= article.title
         p.text-muted
-          span= article.str_create_time
+          = article.str_create_time
+          | , 
+          a.text-muted @Wang
+          |  
           - var tags = article.tags && article.tags.split(',')
           if tags
             each tag in tags
               | &nbsp;
-              a.label.label-default(href='#' + tag)= tag
+              a.text-muted= '#' + tag
           if user && user.admin
             | &nbsp;
             a.btn.btn-xs.btn-default(href='/article/edit/' + article.uri)

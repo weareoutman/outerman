@@ -6,7 +6,7 @@ html
     title= title
     meta(http-equiv='X-UA-Compatible', content='IE=edge')
     meta(name='viewport', content='width=device-width, initial-scale=1.0')
-    link(rel='stylesheet', href='http://c.weihub.com/css/style-built.css?bust=style.d2b1e06094')
+    link(rel='stylesheet', href='http://c.weihub.com/css/style-built.css?bust=style.fe0b7aea3e')
     if styles
       each style in styles
         link(rel='stylesheet', href='http://c.weihub.com/css/'+style)
@@ -37,17 +37,20 @@ html
                 input.form-control(type='search', name='q', autocapitalize='off', autocomplete='off', spellcheck='false', placeholder='搜索')
             ul.nav.navbar-nav.navbar-right
               if user
-                li: a(href='')
-                  span.glyphicon.glyphicon-user
-                  |  
-                  = user.fullname
-                li: a(href='/signout')
-                  span.glyphicon.glyphicon-log-out
-                  |  退出
+                li
+                  a(href='')
+                    span.glyphicon.glyphicon-user
+                    |  
+                    = user.fullname
+                li
+                  a(href='/signout')
+                    span.glyphicon.glyphicon-log-out
+                    |  退出
               else 
-                li: a(href='/auth')
-                  span.glyphicon.glyphicon-log-in
-                  |  登录
+                li(class=nav === 'auth' ? 'active' : '')
+                  a(href='/auth')
+                    span.glyphicon.glyphicon-log-in
+                    |  登录
       block content
     .footer
       .container

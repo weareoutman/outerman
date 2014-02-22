@@ -264,10 +264,19 @@ blockquote footer {
 }
 .article-list,
 .article-container {
-  font-family: freight-text-pro, Georgia, Cambria, 'Times New Roman', Times, serif;
+  font-family: Georgia, Cambria, 'Times New Roman', Times, serif;
 }
 .article-title {
   font-family: "Helvetica Neue",Helvetica,Arial,sans-serif
+}
+.article-list .media:not(:first-child) {
+  margin-top: 25px;
+}
+.article-list .media > .pull-left {
+  margin-right: 15px;
+}
+.article-list .media-object {
+  border-radius: 1000px;
 }
 .text-code {
   font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
@@ -293,7 +302,4 @@ textarea.text-code {
 }
 footer .pull-left a {
   margin-left: 0.5em;
-}
-.article-list .media:not(:first-child) {
-  margin-top: 25px;
 }
