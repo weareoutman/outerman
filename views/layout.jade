@@ -6,7 +6,7 @@ html
     title= title
     meta(http-equiv='X-UA-Compatible', content='IE=edge')
     meta(name='viewport', content='width=device-width, initial-scale=1.0')
-    link(rel='stylesheet', href='http://c.weihub.com/css/style-built.css?bust=style.f2fa17b592')
+    link(rel='stylesheet', href='http://c.weihub.com/css/style-built.css?bust=style.d2b1e06094')
     if styles
       each style in styles
         link(rel='stylesheet', href='http://c.weihub.com/css/'+style)
@@ -28,19 +28,26 @@ html
             a.navbar-brand(href='/') WeiHub
           .navbar-collapse.collapse(role='navigation')
             ul.nav.navbar-nav
-              if nav === 'article'
-                li.active: a(href='/article') 文章
-              else
-                li: a(href='/article') 文章
+                li(class=nav === 'article' ? 'active' : '')
+                  a(href='/article')
+                    span.glyphicon.glyphicon-list-alt
+                    |  文章
             form.navbar-form.navbar-left(action='http://www.google.com.hk/search', method='get', role='search')
               .form-group
                 input.form-control(type='search', name='q', autocapitalize='off', autocomplete='off', spellcheck='false', placeholder='搜索')
             ul.nav.navbar-nav.navbar-right
               if user
-                li: a(href='')= user.fullname
-                li: a(href='/signout') 退出
+                li: a(href='')
+                  span.glyphicon.glyphicon-user
+                  |  
+                  = user.fullname
+                li: a(href='/signout')
+                  span.glyphicon.glyphicon-log-out
+                  |  退出
               else 
-                li: a(href='/auth') 登录
+                li: a(href='/auth')
+                  span.glyphicon.glyphicon-log-in
+                  |  登录
       block content
     .footer
       .container
@@ -63,13 +70,15 @@ html
         }
       });
       require(['main']);
-      // Google analytics
-      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-      ga('create', 'UA-48261249-1', 'weihub.com');
-      ga('send', 'pageview');
+    if !DEV
+      script.
+        // Google analytics
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+        ga('create', 'UA-48261249-1', 'weihub.com');
+        ga('send', 'pageview');
     if scripts
       each srcipt in scripts
         script(src=script)

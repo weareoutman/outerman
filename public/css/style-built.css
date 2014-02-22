@@ -262,8 +262,15 @@ blockquote,
 blockquote footer {
   font-size: 100%;
 }
+.article-list,
+.article-container {
+  font-family: freight-text-pro, Georgia, Cambria, 'Times New Roman', Times, serif;
+}
+.article-title {
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif
+}
 .text-code {
-  font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 textarea.text-code {
   word-break: break-all;
@@ -286,4 +293,7 @@ textarea.text-code {
 }
 footer .pull-left a {
   margin-left: 0.5em;
+}
+.article-list .media:not(:first-child) {
+  margin-top: 25px;
 }

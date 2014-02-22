@@ -8,15 +8,25 @@ var express = require('express')
   , db = require('./lib/db')
   , conf = require('./config')
   , mainLog = fs.createWriteStream('./log/main.log', {flags: 'a'})
-  , staticLog = fs.createWriteStream('./log/static.log', {flags: 'a'});
+  , staticLog = fs.createWriteStream('./log/static.log', {flags: 'a'})
+  , dev = app.get('env') === 'development';
 
 var RedisStore = require('connect-redis')(express);
 
+main.locals.DEV = dev;
+
 main.enable('case sensitive routing');
+
+// log
+var logFormat = ':req[X-Real-IP] - - [:date] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" ":req[X-Forwarded-For]"';
+if (dev) {
+  logFormat = 'dev';
+}
 main.use(express.logger({
-  format: ':req[X-Real-IP] - - [:date] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" ":req[X-Forwarded-For]"',
+  format: logFormat,
   stream: mainLog
 }));
+
 main.use(express.compress());
 
 main.use(express.favicon(__dirname + '/public/favicon.ico'));
@@ -93,6 +103,10 @@ main.get('/signout', function(req, res){
 
 // 文章列表
 main.get('/article', article.list, function(req, res){
+  res.locals.list.forEach(function(article){
+    var date = new Date(+ article.create_time);
+    article.str_create_time = date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate();
+  });
   res.render('article/list');
 });
 
@@ -109,7 +123,10 @@ main.get('/article/edit/:uri', user.restrict, article.load, function(req, res){
 
 // 查看单篇文章
 main.get('/article/:uri', article.load, function(req, res){
-    res.render('article/article');
+    var article = res.locals.article
+      , date = new Date(+ article.create_time);
+    article.str_create_time = date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate();
+  res.render('article/article');
 });
 
 // 提交发表新文章
@@ -126,7 +143,7 @@ main.put('/article/:uri', user.restrict, article.update, function(req, res){
 var staticServer = express();
 staticServer.enable('case sensitive routing');
 staticServer.use(express.logger({
-  format: ':req[X-Real-IP] - - [:date] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" ":req[X-Forwarded-For]"',
+  format: logFormat,
   stream: staticLog
 }));
 staticServer.use(express.compress());
@@ -145,4 +162,5 @@ app.use(express.vhost('c.weihub.com', staticServer));
 app.use(express.vhost('www.weihub.com', wwwServer));
 
 app.listen(conf.port, conf.host);
-console.log('[%s] Express started listen on %s:%s', new Date().toUTCString(), conf.host, conf.port);
+console.log('[%s] Express started listen on %s:%s, in %s mode',
+  new Date().toUTCString(), conf.host, conf.port, app.get('env'));

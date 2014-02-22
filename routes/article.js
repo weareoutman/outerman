@@ -23,6 +23,7 @@ var db = require('../lib/db')
   , _ = require('underscore')
   , marked = require('marked')
   , hljs = require('highlight.js')
+  , summary_max_chars = 90
   , KEYS = {
     CURSOR: 'article:cursor',
     LIST: 'article:list',
@@ -144,13 +145,27 @@ function loadArticleByUri(uri, callback) {
   });
 }
 
-// Translate markdown to html
-function md2html(md, callback) {
-  marked(md, function(err, html){
+function process(data, callback) {
+  // Translate markdown to html
+  marked(data.content, function(err, html){
     if (err) {
       return callback(err);
     }
-    callback(null, html);
+    data.html = html;
+    // Cut out the summary of article
+    var cleaned = html.replace(/<[^>]*>/g, '')
+      // Treat the Chinese char as double
+      , count = summary_max_chars * 2
+      , index = -1;
+    while (count > 0) {
+      if (cleaned.charCodeAt(index += 1) > 0x4dff) {
+        count -= 2;
+      } else {
+        count -= 1;
+      }
+    }
+    data.summary = cleaned.substr(0, index);
+    callback();
   });
 }
 
@@ -158,11 +173,10 @@ function createArticle(args, callback) {
   var data = _.pick(args, 'uri', 'author', 'title', 'content', 'tags')
     , tags = data.tags && data.tags.split(',');
   data.update_time = data.create_time = Date.now();
-  md2html(data.content, function(err, html){
+  process(data, function(err){
     if (err) {
       return callback(err);
     }
-    data.html = html;
     db.incr(KEYS.CURSOR, function(err, id){
       if (err) {
         return callback(err);
@@ -201,11 +215,10 @@ function updateArticle(oldUri, args, callback) {
     , tags = data.tags && data.tags.split(',')
     , keyOldUri2id = KEYS.uri2id(oldUri);
   data.update_time = Date.now();
-  md2html(data.content, function(err, html){
+  process(data, function(err){
     if (err) {
       return callback(err);
     }
-    data.html = html;
     db.get(keyOldUri2id, function(err, id){
       if (err) {
         return callback(err);

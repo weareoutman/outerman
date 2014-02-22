@@ -7,11 +7,10 @@ block vars
 block content
   .container
     .row
-      .col-md-8
-        h1= article.title
+      .col-md-8.col-md-offset-2.article-container
+        h1.article-title= article.title
         p.text-muted
-          - var date = new Date(+ article.create_time)
-          span= date.getFullYear() + '年' + (date.getMonth() + 1) + '月' + date.getDate() + '日'
+          span= article.str_create_time
           - var tags = article.tags && article.tags.split(',')
           if tags
             each tag in tags
@@ -22,4 +21,4 @@ block content
             a.btn.btn-xs.btn-default(href='/article/edit/' + article.uri)
               span.glyphicon.glyphicon-edit
               |  编辑
-        article!= article.html
+        .article-content!= article.html
