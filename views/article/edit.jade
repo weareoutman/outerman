@@ -1,7 +1,7 @@
 extends ../layout.jade
 
 block vars
-  - var title = update ? '修改文章: ' + article.title : '写一篇文章'
+  - var title = (update ? '修改文章: ' + article.title : '写一篇文章') + ' - WeiHub'
   - var nav = 'article'
 
 block content
@@ -19,7 +19,6 @@ block content
       .form-group
         label(for='inputTags') 标签
         input#inputTags.form-control(name='tags', type='text', placeholder='标签', value=update ? article.tags : '')
-      input(name='author', type='hidden', value='outerman')
       button.btn.btn-primary(type='submit') 保存
       if update
         |  

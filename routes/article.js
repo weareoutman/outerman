@@ -39,36 +39,6 @@ var db = require('../lib/db')
     }
   };
 
-marked.Renderer.prototype.code = function(code, lang, escaped) {
-  if (this.options.highlight) {
-    var out = this.options.highlight(code, lang);
-    if (out != null && out !== code) {
-      escaped = true;
-      code = out;
-    }
-  }
-
-  if (!lang) {
-    return '<pre><code>'
-      + (escaped ? code : escape(code, true))
-      + '\n</code></pre>';
-  }
-
-  return '<pre class="'
-    + this.options.langPrefix
-    + escape(lang, true)
-    + '"><code>'
-    + (escaped ? code : escape(code, true))
-    + '\n</code></pre>\n';
-};
-
-marked.setOptions({
-  langPrefix: 'hljs ',
-  highlight: function(code, lang){
-    return lang ? hljs.highlight(lang, code).value : hljs.highlightAuto(code).value;
-  }
-});
-
 exports.list = function(req, res, next) {
   getArticleList(function(err, list){
     if (err) {
@@ -92,8 +62,8 @@ exports.load = function(req, res, next) {
   });
 };
 
-exports.create = function(req, res, next) {
-  createArticle(req.body, function(err, article){
+exports.post = function(req, res, next) {
+  create(res.locals.user, req.body, function(err, article){
     if (err) {
       return next(err);
     }
@@ -102,8 +72,8 @@ exports.create = function(req, res, next) {
   });
 };
 
-exports.update = function(req, res, next) {
-  updateArticle(req.params.uri, req.body, function(err, article){
+exports.put = function(req, res, next) {
+  update(res.locals.user, res.locals.article, req.body, function(err, article){
     if (err) {
       return next(err);
     }
@@ -145,9 +115,39 @@ function loadArticleByUri(uri, callback) {
   });
 }
 
+var renderer = new marked.Renderer();
+renderer.code = function(code, lang, escaped) {
+  if (this.options.highlight) {
+    var out = this.options.highlight(code, lang);
+    if (out != null && out !== code) {
+      escaped = true;
+      code = out;
+    }
+  }
+
+  if (!lang) {
+    return '<pre><code>'
+      + (escaped ? code : escape(code, true))
+      + '\n</code></pre>';
+  }
+
+  return '<pre class="'
+    + this.options.langPrefix
+    + escape(lang, true)
+    + '"><code>'
+    + (escaped ? code : escape(code, true))
+    + '\n</code></pre>\n';
+};
+
 function process(data, callback) {
   // Translate markdown to html
-  marked(data.content, function(err, html){
+  marked(data.content, {
+    renderer: renderer,
+    langPrefix: 'hljs ',
+    highlight: function(code, lang){
+      return lang ? hljs.highlight(lang, code).value : hljs.highlightAuto(code).value;
+    }
+  }, function(err, html){
     if (err) {
       return callback(err);
     }
@@ -169,9 +169,10 @@ function process(data, callback) {
   });
 }
 
-function createArticle(args, callback) {
-  var data = _.pick(args, 'uri', 'author', 'title', 'content', 'tags')
+function create(user, args, callback) {
+  var data = _.pick(args, 'uri', 'title', 'content', 'tags')
     , tags = data.tags && data.tags.split(',');
+  data.user_id = user.id;
   data.update_time = data.create_time = Date.now();
   process(data, function(err){
     if (err) {
@@ -190,6 +191,7 @@ function createArticle(args, callback) {
           return callback('id existed');
         }
         var multi = db.multi();
+        data.id = id;
         multi.hmset(keyId, data);
         multi.set(KEYS.uri2id(data.uri), id);
         multi.lpush(KEYS.LIST, id);
@@ -210,55 +212,41 @@ function createArticle(args, callback) {
   });
 }
 
-function updateArticle(oldUri, args, callback) {
-  var data = _.pick(args, 'uri', 'author', 'title', 'content', 'tags')
+function update(user, old, args, callback) {
+  var data = _.pick(args, 'uri', 'title', 'content', 'tags')
     , tags = data.tags && data.tags.split(',')
-    , keyOldUri2id = KEYS.uri2id(oldUri);
+    , id = old.id
+    , keyOldUri2id = KEYS.uri2id(old.uri);
+  data.user_id = user.id;
   data.update_time = Date.now();
   process(data, function(err){
     if (err) {
       return callback(err);
     }
-    db.get(keyOldUri2id, function(err, id){
+    var keyId = KEYS.id2article(id);
+    var multi = db.multi()
+      , keyNewUri2id = KEYS.uri2id(data.uri)
+      , oldTags = old.tags && old.tags.split(',');
+    if (keyOldUri2id !== keyNewUri2id) {
+      multi.rename(keyOldUri2id, keyNewUri2id);
+    }
+    multi.hmset(keyId, data);
+    multi.zadd(KEYS.UPDATE_TIME, data.update_time, id);
+    if (oldTags && oldTags.length > 0) {
+      oldTags.forEach(function(tag, i){
+        multi.srem(KEYS.tag2id(tag), id);
+      });
+    }
+    if (tags && tags.length > 0) {
+      tags.forEach(function(tag, i){
+        multi.sadd(KEYS.tag2id(tag), id);
+      });
+    }
+    multi.exec(function(err){
       if (err) {
         return callback(err);
       }
-      if (! id) {
-        return callback('article id not found');
-      }
-      var keyId = KEYS.id2article(id);
-      db.hgetall(keyId, function(err, exist){
-        if (err) {
-          return callback(err);
-        }
-        if (! exist) {
-          return callback('article not found');
-        }
-        var multi = db.multi()
-          , keyNewUri2id = KEYS.uri2id(data.uri)
-          , oldTags = exist.tags && exist.tags.split(',');
-        if (keyOldUri2id !== keyNewUri2id) {
-          multi.rename(keyOldUri2id, keyNewUri2id);
-        }
-        multi.hmset(keyId, data);
-        multi.zadd(KEYS.UPDATE_TIME, data.update_time, id);
-        if (oldTags && oldTags.length > 0) {
-          oldTags.forEach(function(tag, i){
-            multi.srem(KEYS.tag2id(tag), id);
-          });
-        }
-        if (tags && tags.length > 0) {
-          tags.forEach(function(tag, i){
-            multi.sadd(KEYS.tag2id(tag), id);
-          });
-        }
-        multi.exec(function(err){
-          if (err) {
-            return callback(err);
-          }
-          callback(null, data);
-        });
-      });
+      callback(null, data);
     });
   });
 }

@@ -7,21 +7,39 @@ block vars
 block content
   .container
     .row
-      .col-md-8.col-md-offset-2.article-container
-        h1.article-title= article.title
-        p.text-muted
-          = article.str_create_time
-          | , 
-          a.text-muted @Wang
-          |  
-          - var tags = article.tags && article.tags.split(',')
-          if tags
-            each tag in tags
+      .col-md-8.col-md-offset-2
+        .article-container
+          h1.article-title= article.title
+          p.text-muted
+            = article.str_create_time
+            | , 
+            a.text-muted @Wang
+            |  
+            - var tags = article.tags && article.tags.split(',')
+            if tags
+              each tag in tags
+                | &nbsp;
+                a.text-muted= '#' + tag
+            if user && user.admin
               | &nbsp;
-              a.text-muted= '#' + tag
-          if user && user.admin
-            | &nbsp;
-            a.btn.btn-xs.btn-default(href='/article/edit/' + article.uri)
-              span.glyphicon.glyphicon-edit
-              |  编辑
-        .article-content!= article.html
+              a.btn.btn-xs.btn-default(href='/article/' + article.uri + '/edit')
+                span.glyphicon.glyphicon-edit
+                |  编辑
+          .article-content!= article.html
+        //- #comments.comment-container
+        //- if list.length > 0
+        //-   ul.media-list.comment-list
+        //-     each comment in list
+        //-       li.media
+        //-         a.pull-left
+        //-           //- img.media-object(src='http://c.weihub.com/images/me@2x.jpg', width='64', height='64')
+        //-           img.media-object(src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjZWVlIj48L3JlY3Q+PHRleHQgdGV4dC1hbmNob3I9Im1pZGRsZSIgeD0iMzIiIHk9IjMyIiBzdHlsZT0iZmlsbDojYWFhO2ZvbnQtd2VpZ2h0OmJvbGQ7Zm9udC1zaXplOjEycHg7Zm9udC1mYW1pbHk6QXJpYWwsSGVsdmV0aWNhLHNhbnMtc2VyaWY7ZG9taW5hbnQtYmFzZWxpbmU6Y2VudHJhbCI+NjR4NjQ8L3RleHQ+PC9zdmc+', width='64', height='64')
+        //-         .media-body
+        //-           .media-heading.text-muted
+        //-             a.text-muted= comment.user_id
+        //-             |  
+        //-             = comment.str_create_time
+        //-           div!= comment.html
+        //- form.comment-form(action='/article/' + article.uri + '/comment', method='post', autocomplete="off")
+        //-   textarea.form-control(name='content')
+        //-   button.btn.btn-primary(type='submit') 提交

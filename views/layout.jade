@@ -32,13 +32,13 @@ html
                   a(href='/article')
                     span.glyphicon.glyphicon-list-alt
                     |  文章
-            form.navbar-form.navbar-left(action='http://www.google.com.hk/search', method='get', role='search')
-              .form-group
-                input.form-control(type='search', name='q', autocapitalize='off', autocomplete='off', spellcheck='false', placeholder='搜索')
+            //- form.navbar-form.navbar-left(action='http://www.google.com.hk/search', method='get', role='search')
+            //-   .form-group
+            //-     input.form-control(type='search', name='q', autocapitalize='off', autocomplete='off', spellcheck='false', placeholder='搜索')
             ul.nav.navbar-nav.navbar-right
               if user
                 li
-                  a(href='')
+                  a
                     span.glyphicon.glyphicon-user
                     |  
                     = user.fullname

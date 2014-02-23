@@ -5,6 +5,7 @@ var express = require('express')
   , user = require('./routes/user')
   , oauth = require('./lib/oauth')
   , article = require('./routes/article')
+  , comment = require('./routes/comment')
   , db = require('./lib/db')
   , conf = require('./config')
   , mainLog = fs.createWriteStream('./log/main.log', {flags: 'a'})
@@ -115,28 +116,43 @@ main.get('/article/edit', user.restrict, function(req, res){
   res.render('article/edit');
 });
 
+// 查看单篇文章
+main.get('/article/:uri', article.load, comment.list, function(req, res){
+  var article = res.locals.article
+    , date = new Date(+ article.create_time);
+  article.str_create_time = date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate();
+  res.locals.list.forEach(function(comment){
+    var date = new Date(+ comment.create_time);
+    comment.str_create_time = date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate();
+  });
+  res.render('article/article');
+});
+
 // 修改文章
-main.get('/article/edit/:uri', user.restrict, article.load, function(req, res){
+main.get('/article/:uri/edit', user.restrict, article.load, function(req, res){
   res.locals.update = true;
   res.render('article/edit');
 });
 
-// 查看单篇文章
-main.get('/article/:uri', article.load, function(req, res){
-    var article = res.locals.article
-      , date = new Date(+ article.create_time);
-    article.str_create_time = date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate();
-  res.render('article/article');
-});
-
 // 提交发表新文章
-main.post('/article', user.restrict, article.create, function(req, res){
+main.post('/article', user.restrict, article.post, function(req, res){
   res.redirect('/article/' + res.locals.article.uri);
 });
 
 // 提交修改文章
-main.put('/article/:uri', user.restrict, article.update, function(req, res){
+main.put('/article/:uri', user.restrict, article.load, article.put, function(req, res){
   res.redirect('/article/' + res.locals.article.uri);
+});
+
+// 评论列表
+main.get('/article/:uri/comment', article.load, comment.list, function(req, res){
+  res.send(res.locals.list);
+});
+
+// 提交评论
+main.post('/article/:uri/comment', user.restrict, article.load, comment.post, function(req, res){
+  // res.send(res.locals.comment);
+  res.redirect('/article/' + req.params.uri + '#comments');
 });
 
 // 静态文件服务
