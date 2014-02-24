@@ -81,4 +81,24 @@ module.exports = function(grunt) {
       });
     });
   });
+
+  grunt.loadNpmTasks('grunt-contrib-watch');
+
+  grunt.initConfig({
+    watch: {
+      options: {
+        spawn: false
+      },
+      scripts: {
+        files: ['public/js/main.js']
+      },
+      styles: {
+        files: ['public/css/style.css']
+      }
+    }
+  });
+
+  grunt.event.on('watch', function(action, filepath, target) {
+    grunt.log.writeln(target + ': ' + filepath + ' has ' + action);
+  });
 };

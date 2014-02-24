@@ -18,10 +18,16 @@
     "request": "~2.31.0",
     "connect-redis": "~1.4.6",
     "marked": "~0.3.1",
-    "highlight.js": "~8.0.0"
+    "highlight.js": "~8.0.0",
+    "q": "^1.0.0"
   },
   "devDependencies": {
     "grunt": "~0.4.2",
-    "requirejs": "~2.1.10"
+    "requirejs": "~2.1.10",
+    "grunt-contrib-watch": "~0.5.3",
+    "gulp": "^3.5.2",
+    "through2": "^0.4.1",
+    "gulp-replace": "^0.2.0",
+    "gulp-util": "^2.2.14"
   }
 }
