@@ -1,68 +1,51 @@
 var gulp = require('gulp')
-  // , fs = require('fs')
+  , _ = require('underscore')
   , requirejs = require('requirejs')
   , crypto = require('crypto')
   , through = require('through2')
-  , replace = require('gulp-replace')
-  , PluginError = require('gulp-util/lib/PluginError');
+  , replace = require('gulp-replace');
+
+var confList = ['main', 'style']
+  , confs = {};
+confList.forEach(function(name){
+  confs[name] = require('./tools/' + name + '-build.json');
+});
+
+_.each(confs, function(conf, name){
+  gulp.task('rjs:' + name, function(){
+    requirejs.optimize(conf, function(out){
+      console.log('requirejs optimized: ', out);
+    }, function(err){
+      console.warn('requirejs optimize js error: ', err);
+    });
+  });
+  gulp.task('bust:' + name, ['rjs:' + name], function(){
+    gulp.src([conf.out]).pipe(bust(name));
+  });
+});
 
 gulp.task('watch', function(){
-  gulp.watch(['public/js/main.js'], ['scripts']);
-  gulp.watch(['public/css/style.css'], ['bust']);
-});
-
-gulp.task('scripts', function(){
-  requirejs.optimize({
-    "baseUrl": "public/js",
-    "mainConfigFile": "public/js/main.js",
-    "optimize": "uglify2",
-    "preserveLicenseComments": false,
-    "name": "main",
-    "out": "public/js/main-built.js"
-  }, function(out){
-    console.log('requirejs optimized: ', out);
-  }, function(err){
-    console.warn('requirejs optimize js error: ', err);
+  _.each(confs, function(conf, name){
+    gulp.watch([].concat(conf.mainConfigFile || conf.cssIn), ['bust:' + name]);
   });
 });
 
-gulp.task('styles', function(){
-  requirejs.optimize({
-    "cssIn": "public/css/style.css",
-    "out": "public/css/style-built.css"
-  }, function(out){
-    console.log('requirejs optimized: ', out);
-  }, function(err){
-    console.warn('requirejs optimize css error: ', err);
-  });
-});
-
-function bustError() {
-  var Factory = PluginError.bind.apply(PluginError, [].concat(null, 'bust', Array.prototype.slice.call(arguments)));
-  return new Factory();
-}
-
-function bust() {
+function bust(name) {
   function a(file, encoding, callback) {
     if (file.isNull()) {
       this.push(file);
       return callback();
     }
     if (file.isStream()) {
-      return callback(bustError('Streaming not supported'));
+      return callback(new Error('Streaming not supported'));
     }
-    var sha1 = crypto.createHash('sha1').update(file.contents).digest('hex').substr(0,10);
+    var sha1 = crypto.createHash('sha1').update(file.contents).digest('hex').substr(0,5);
     gulp.src('views/layout.jade')
-      .pipe(replace(new RegExp('\\b(bust=style)(?:\\.(\\w+))?\\b'), '$1.' + sha1))
+      .pipe(replace(new RegExp('\\b(bust=' + name + ')(?:\\.(\\w+))?\\b'), '$1.' + sha1))
       .pipe(gulp.dest('views'));
     return callback();
   }
   return through.obj(a);
 }
-
-gulp.task('bust', ['styles'], function(){
-  gulp.src(['public/css/style-built.css'])
-    .pipe(bust());
-});
 
 gulp.task('default', ['watch']);

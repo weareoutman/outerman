@@ -33,6 +33,7 @@ SET user:from:[id] [from]
 */
 
 var db = require('../lib/db')
+  , Q = require('q')
   , _ = require('underscore')
   , crypto = require('crypto')
   , SIGN_LEN = 128
@@ -71,22 +72,25 @@ var db = require('../lib/db')
     }
   };
 
+// enable long stack
+Q.longStackSupport = true;
+
 exports.check = function(req, res, next){
   var user = req.user;
-  db.get(KEYS.fromUid2id(user.from, user.from_uid), function(err, id){
-    if (err) {
-      return next(err);
-    }
-    if (id !== null) {
+  Q.ninvoke(db, 'get', KEYS.fromUid2id(user.from, user.from_uid))
+  .then(function(id){
+    if (id === null) {
+      return create(user);
+    } else {
       user.id = id;
-      return sign(req, res, next);
     }
-    create(user, function(err){
-      if (err) {
-        return next(err);
-      }
-      sign(req, res, next);
-    });
+  })
+  .then(function(){
+    return sign(req, res);
+  })
+  .fail(next)
+  .done(function(){
+    next();
   });
 };
 
@@ -101,26 +105,26 @@ exports.load = function(req, res, next){
   if (! (uid && usign && usalt)) {
     return next();
   }
-  db.hgetall(KEYS.id2auth(uid), function(err, data){
-    if (err) {
-      return next(err);
-    }
+  Q.ninvoke(db, 'hgetall', KEYS.id2auth(uid))
+  .then(function(data){
     if (! data || data.salt !== usalt) {
-      return next();
+      return;
     }
     var sha1 = crypto.createHmac('sha1', usalt);
     sha1.update(usign);
     if (data.hash !== sha1.digest('base64')) {
-      return next();
+      return;
     }
-    getUser(uid, function(err, user){
-      if (err) {
-        return next(err);
-      }
+    return getUser(uid)
+    .then(function(replies){
+      var user = _.extend.apply(_, replies);
       req.session.user = user;
       res.locals.user = user;
-      next();
     });
+  })
+  .fail(next)
+  .done(function(){
+    next();
   });
 };
 
@@ -131,39 +135,35 @@ exports.restrict = function(req, res, next) {
   next();
 };
 
-function sign(req, res, next) {
-  var id = req.user.id;
-  crypto.randomBytes(SIGN_LEN, function(err, buf){
-    if (err) {
-      return next(err);
-    }
-    var salt = buf.toString('base64');
-    crypto.randomBytes(SIGN_LEN, function(err, buf){
-      if (err) {
-        return next(err);
-      }
-      var pswd = buf.toString('base64')
-        , sha1 = crypto.createHmac('sha1', salt);
-      sha1.update(pswd);
-      db.hmset(KEYS.id2auth(id), {
-        hash: sha1.digest('base64'),
-        salt: salt
-      }, function(err, reply){
-        if (err) {
-          return next(err);
-        }
-        var month = 2.592e9;
-        res.cookie('uid', '' + id, { maxAge: month });
-        res.cookie('usign', pswd, { maxAge: month });
-        res.cookie('usalt', salt, { maxAge: month });
-        next(null);
-      });
+function sign(req, res) {
+  var id = req.user.id
+    , salt
+    , pswd;
+  return Q.ninvoke(crypto, 'randomBytes', SIGN_LEN)
+  .then(function(buf){
+    salt = buf.toString('base64');
+    return Q.ninvoke(crypto, 'randomBytes', SIGN_LEN);
+  })
+  .then(function(buf){
+    pswd = buf.toString('base64');
+    var sha1 = crypto.createHmac('sha1', salt);
+    sha1.update(pswd);
+    return Q.ninvoke(db, 'hmset', KEYS.id2auth(id), {
+      hash: sha1.digest('base64'),
+      salt: salt
     });
+  })
+  .then(function(){
+    var month = 2.592e9;
+    res.cookie('uid', '' + id, { maxAge: month });
+    res.cookie('usign', pswd, { maxAge: month });
+    res.cookie('usalt', salt, { maxAge: month });
   });
 }
 
-function create(user, callback) {
-  db.incr(KEYS.CURSOR, function(err, id){
+function create(user) {
+  return Q.ninvoke(db, 'incr', KEYS.CURSOR)
+  .then(function(id){
     id = '' + id;
     user.id = id;
     var base = _.pick(user, FIELDS.BASE)
@@ -184,23 +184,13 @@ function create(user, callback) {
     multi.set(KEYS.fromUid2id(user.from, user.from_uid), id);
     multi.sadd(KEYS.from2id(user.from), id);
     // }
-    multi.exec(function(err){
-      if (err) {
-        return callback(err);
-      }
-      callback(null);
-    });
+    return Q.ninvoke(multi, 'exec');
   });
 }
 
-function getUser(id, callback) {
+function getUser(id) {
   var multi = db.multi();
   multi.hgetall(KEYS.id2user(id));
   multi.hgetall(KEYS.id2more(id));
-  multi.exec(function(err, replies){
-    if (err) {
-      return callback(err);
-    }
-    callback(null, _.extend.apply(_, replies));
-  });
+  return Q.ninvoke(multi, 'exec');
 }
