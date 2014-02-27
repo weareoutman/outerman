@@ -17,12 +17,8 @@ blockquote,
 blockquote footer {
   font-size: 100%;
 }
-.article-list,
-.article-container {
+.article-meta {
   font-family: Georgia, Cambria, 'Times New Roman', Times, serif;
-}
-.article-title {
-  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif
 }
 .article-list .media:not(:first-child) {
   margin-top: 25px;

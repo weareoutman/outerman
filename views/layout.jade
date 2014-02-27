@@ -6,7 +6,7 @@ html
     title= title
     meta(http-equiv='X-UA-Compatible', content='IE=edge')
     meta(name='viewport', content='width=device-width, initial-scale=1.0')
-    link(rel='stylesheet', href='http://c.weihub.com/css/style-built.css?bust=style.fe0b7')
+    link(rel='stylesheet', href='http://c.weihub.com/css/style-built.css?bust=style.ddeb8')
     if styles
       each style in styles
         link(rel='stylesheet', href='http://c.weihub.com/css/'+style)
@@ -43,12 +43,12 @@ html
                     |  
                     = user.fullname
                 li
-                  a(href='/signout')
+                  a#top-sign-out(href='/signout')
                     span.glyphicon.glyphicon-log-out
                     |  退出
               else 
                 li(class=nav === 'auth' ? 'active' : '')
-                  a(href='/auth')
+                  a#top-sign-in(href='/auth')
                     span.glyphicon.glyphicon-log-in
                     |  登录
       block content
@@ -67,7 +67,7 @@ html
     script.
       require.config({
         baseUrl: 'http://c.weihub.com/js/',
-        urlArgs: 'bust=main.e6df4',
+        urlArgs: 'bust=main.8d97c',
         paths: {
           main: 'main-built'
         }

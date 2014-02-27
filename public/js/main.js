@@ -13,4 +13,8 @@ require.config({
     }
   }
 });
-require(['bootstrap'/*, 'backbone'*/]);
+require(['jquery', 'bootstrap'/*, 'backbone'*/], function($){
+  var path = encodeURIComponent(location.pathname + location.search)
+  $('#top-sign-in').attr('href', '/auth?path=' + path);
+  $('#top-sign-out').attr('href', '/signout?path=' + path);
+});

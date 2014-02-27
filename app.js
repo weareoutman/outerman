@@ -1,16 +1,18 @@
 var express = require('express')
   , fs = require('fs')
-  , app = express()
-  , main = express()
+  , util = require('util')
   , user = require('./routes/user')
   , oauth = require('./lib/oauth')
   , article = require('./routes/article')
   , comment = require('./routes/comment')
   , db = require('./lib/db')
   , conf = require('./config')
+  , app = express()
+  , main = express()
   , mainLog = fs.createWriteStream('./log/main.log', {flags: 'a'})
   , staticLog = fs.createWriteStream('./log/static.log', {flags: 'a'})
-  , dev = app.get('env') === 'development';
+  , dev = app.get('env') === 'development'
+  , regPath = /^\/($|[^\/]+)/;
 
 var RedisStore = require('connect-redis')(express);
 
@@ -77,20 +79,58 @@ main.get('/robots.txt', function(req, res){
 });
 
 main.get('/auth', function(req, res){
-  var url = req.query.url || '/'
-    , state = Math.random().toString(36).replace('.', '');
-  req.session.state = state;
-  res.locals.state = encodeURIComponent(state + '.' + url);
+  var path = req.query.path;
+  if (! regPath.test(path)) {
+    path = '/';
+  }
+  res.locals.path = encodeURIComponent(path);
   res.render('auth');
 });
 
-oauth.list.forEach(function(from){
-  main.get('/auth/' + from, oauth.before, oauth[from].auth, user.check, function(req, res){
+main.get('/auth/redirect/:site', function(req, res, next){
+  var site = req.params.site;
+  if (oauth.list.indexOf(site) === -1) {
+    return next();
+  }
+  var path = req.query.path
+    , state = Math.random().toString(36).replace('.', '');
+  if (! regPath.test(path)) {
+    path = '/';
+  }
+  req.session.state = state;
+  state = encodeURIComponent(state + '.' + path);
+  var url;
+  switch (site) {
+    case 'weibo':
+      url = util.format('https://api.weibo.com/oauth2/authorize?client_id=%s&response_type=code&redirect_uri=%s&state=%s', conf.weibo.client_id, conf.weibo.redirect_uri, state);
+      break;
+    case 'qq':
+      url = util.format('https://graph.qq.com/oauth2.0/authorize?client_id=%s&response_type=code&redirect_uri=%s&state=%s', conf.qq.client_id, conf.qq.redirect_uri, state);
+      break;
+    case 'github':
+      url = util.format('https://github.com/login/oauth/authorize?scope=user:email&client_id=%s&redirect_uri=%s&state=%s', conf.github.client_id, conf.github.redirect_uri, state);
+      break;
+    case 'instagram':
+      url = util.format('https://api.instagram.com/oauth/authorize/?client_id=%s&response_type=code&redirect_uri=%s&state=%s', conf.instagram.client_id, conf.instagram.redirect_uri, state);
+      break;
+    default:
+      next();
+      return;
+  }
+  res.redirect(url);
+});
+
+oauth.list.forEach(function(site){
+  main.get('/auth/' + site, oauth.before, oauth[site].auth, user.check, function(req, res){
     res.redirect(req.redirectUrl);
   });
 });
 
 main.get('/signout', function(req, res){
+  var path = req.query.path;
+  if (! regPath.test(path)) {
+    path = '/';
+  }
   req.session.destroy(function(err){
     if (err) {
       console.error(err);
@@ -98,7 +138,7 @@ main.get('/signout', function(req, res){
     res.clearCookie('uid');
     res.clearCookie('usign');
     res.clearCookie('usalt');
-    res.redirect('/');
+    res.redirect(path);
   });
 });
 
