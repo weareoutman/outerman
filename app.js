@@ -203,6 +203,13 @@ staticServer.use(express.logger({
   stream: staticLog
 }));
 staticServer.use(express.compress());
+// @font-face access control
+staticServer.use(function(req, res, next){
+  res.header('Access-Control-Allow-Origin', 'weihub.com');
+  res.header('Access-Control-Allow-Methods', 'GET');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+});
 staticServer.use(express.static(__dirname + '/public', {
   maxAge: 8.64e7 // 1天
 }));
