@@ -205,9 +205,15 @@ staticServer.use(express.logger({
 staticServer.use(express.compress());
 // @font-face access control
 staticServer.use(function(req, res, next){
-  res.header('Access-Control-Allow-Origin', 'weihub.com');
-  res.header('Access-Control-Allow-Methods', 'GET');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.headers.origin) {
+    res.header('Access-Control-Allow-Origin', 'weihub.com');
+    if (req.method === 'OPTIONS') {
+      res.header('Access-Control-Allow-Methods', 'GET');
+      res.header('Access-Control-Allow-Headers', 'Content-Type');
+      res.header('Access-Control-Allow-Max-Age', '2592000');
+      return res.send(200);
+    }
+  }
   next();
 });
 staticServer.use(express.static(__dirname + '/public', {
