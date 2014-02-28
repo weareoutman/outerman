@@ -206,7 +206,7 @@ staticServer.use(express.compress());
 // @font-face access control
 staticServer.use(function(req, res, next){
   if (req.headers.origin) {
-    res.header('Access-Control-Allow-Origin', 'weihub.com');
+    res.header('Access-Control-Allow-Origin', 'http://weihub.com');
     if (req.method === 'OPTIONS') {
       res.header('Access-Control-Allow-Methods', 'GET');
       res.header('Access-Control-Allow-Headers', 'Content-Type');
