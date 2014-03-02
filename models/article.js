@@ -1,4 +1,4 @@
-// router article
+// Model Article
 
 /*
 INCR article:cursor [next_id]
@@ -42,8 +42,8 @@ var Promise = require('bluebird')
   };
 
 // get article list
-exports.list = function(req, res, next) {
-  db.lrangeAsync(KEYS.LIST, 0, -1)
+function list() {
+  return db.lrangeAsync(KEYS.LIST, 0, -1)
   .then(function(ids){
     if (ids.length === 0) {
       return Promise.resolve([]);
@@ -53,40 +53,29 @@ exports.list = function(req, res, next) {
       multi.hgetall(KEYS.id2article(id));
     });
     return Promise.promisify(multi.exec, multi)();
-  })
-  .then(function(list){
-    res.locals.list = list;
-    next();
-  })
-  .catch(next);
-};
+  });
+}
 
-// load an article by the uri in request params
-exports.load = function(req, res, next) {
-  db.getAsync(KEYS.uri2id(req.params.uri))
+// get an article
+function get(uri) {
+  return db.getAsync(KEYS.uri2id(uri))
   .then(function(id){
     if (! id) {
       throw new Error('article not found');
     }
     return db.hgetallAsync(KEYS.id2article(id));
-  })
-  .then(function(article){
-    res.locals.article = article;
-    next();
-  })
-  .catch(next);
-};
+  });
+}
 
 // post an article
-exports.post = function(req, res, next) {
-  var user = res.locals.user
-    , data = _.pick(req.body, 'uri', 'title', 'content', 'tags')
+function post(body, user) {
+  var data = _.pick(body, 'uri', 'title', 'content', 'tags')
     , tags = data.tags && data.tags.split(',');
   data.user_id = user.id;
   data.update_time = data.create_time = Date.now();
 
   // markdown to html, and cut out the summary
-  processAsync(data)
+  return processAsync(data)
   .then(function(){
     // incr id cursor
     return db.incrAsync(KEYS.CURSOR);
@@ -117,28 +106,21 @@ exports.post = function(req, res, next) {
   .then(function(){
     // get article from db
     return db.hgetallAsync(KEYS.id2article(data.id));
-  })
-  .then(function(article){
-    res.locals.article = article;
-    next();
-  })
-  .catch(next);
-};
+  });
+}
 
 // update an article
-exports.put = function(req, res, next) {
-  var user = res.locals.user
-    , old = res.locals.article
-    , data = _.pick(req.body, 'uri', 'title', 'content', 'tags')
+function put(old, body, user) {
+  var data = _.pick(body, 'uri', 'title', 'content', 'tags')
     , tags = data.tags && data.tags.split(',')
     , id = old.id;
   data.user_id = user.id;
   data.update_time = Date.now();
 
-  delete res.locals.article;
+  // delete res.locals.article;
 
   // markdown to html, and cut out the summary
-  processAsync(data)
+  return processAsync(data)
   .then(function(){
     var multi = db.multi()
       , keyOldUri2id = KEYS.uri2id(old.uri)
@@ -167,12 +149,7 @@ exports.put = function(req, res, next) {
   .then(function(){
     // get article from db
     return db.hgetallAsync(KEYS.id2article(id));
-  })
-  .then(function(article){
-    res.locals.article = article;
-    next();
-  })
-  .catch(next);
+  });
 };
 
 // redefine marked renderer
@@ -231,3 +208,12 @@ function processAsync(data) {
     return Promise.resolve();
   });
 }
+
+var ArticleModel = {
+  list: list,
+  get: get,
+  post: post,
+  put: put
+};
+
+module.exports = ArticleModel;

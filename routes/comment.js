@@ -15,10 +15,11 @@ LPUSH comment:list:[article_id] [id]
 # ZADD comment:vote:[article_id] [update_time] [id]
 */
 
-var db = require('../lib/db')
-  , Q = require('q')
+var Promise = require('bluebird')
   , _ = require('underscore')
   , marked = require('marked')
+  , db = require('../lib/db')
+  , markedAsync = Promise.promisify(marked)
   , KEYS = {
     CURSOR: 'comment:cursor',
     id2comment: function(id) {
@@ -33,22 +34,22 @@ var db = require('../lib/db')
   };
 
 exports.list = function(req, res, next){
-  Q.ninvoke(db, 'lrange', KEYS.list(res.locals.article.id), 0, -1)
+  db.lrangeAsync(KEYS.list(res.locals.article.id), 0, -1)
   .then(function(list){
     if (list.length === 0) {
-      return [];
+      return Promise.resolve([]);
     }
     var multi = db.multi();
     list.forEach(function(id){
       multi.hgetall(KEYS.id2comment(id));
     });
-    return Q.ninvoke(multi, 'exec');
+    return Promise.promisify(multi.exec, multi)();
   })
-  .fail(next)
-  .done(function(list){
+  .then(function(list){
     res.locals.list = list;
     next();
-  });
+  })
+  .catch(next);
 };
 
 exports.post = function(req, res, next) {
@@ -58,10 +59,10 @@ exports.post = function(req, res, next) {
   data.article_id = article.id;
   data.user_id = user.id;
   data.create_time = Date.now();
-  process(data)
+  processAsync(data)
   .then(function(html){
     data.html = html;
-    return Q.ninvoke(db, 'incr', KEYS.CURSOR);
+    return db.incrAsync(KEYS.CURSOR);
   })
   .then(function(id){
     var multi = db.multi();
@@ -69,19 +70,19 @@ exports.post = function(req, res, next) {
     multi.hmset(KEYS.id2comment(id), data);
     multi.lpush(KEYS.list(data.article_id), id);
     // multi.zadd(KEYS.vote(articleId), 0, id);
-    return Q.ninvoke(multi, 'exec');
+    return Promise.promisify(multi.exec, multi)();
   })
   .then(function(exist){
-    return Q.ninvoke(db, 'hgetall', KEYS.id2comment(data.id));
+    return db.hgetallAsync(KEYS.id2comment(data.id));
   })
-  .fail(next)
-  .done(function(comment){
+  .then(function(comment){
     res.locals.comment = comment;
     next();
-  });
+  })
+  .catch(next);
 };
 
-function process(data, callback) {
+function processAsync(data, callback) {
   // Translate markdown to html
-  return Q.nfcall(marked, data.content, { sanitize: true });
+  return markedAsync(data.content, { sanitize: true });
 }

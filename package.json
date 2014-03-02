@@ -19,7 +19,8 @@
     "connect-redis": "~1.4.6",
     "marked": "~0.3.1",
     "highlight.js": "~8.0.0",
-    "q": "^1.0.0"
+    "q": "^1.0.0",
+    "bluebird": "^1.0.7"
   },
   "devDependencies": {
     "requirejs": "~2.1.10",

@@ -6,7 +6,7 @@ html
     title= title
     meta(http-equiv='X-UA-Compatible', content='IE=edge')
     meta(name='viewport', content='width=device-width, initial-scale=1.0')
-    link(rel='stylesheet', href='http://c.weihub.com/css/style-built.css?bust=style.ddeb8')
+    link(rel='stylesheet', href='http://c.weihub.com/css/style-built.css?bust=style.294b6')
     if styles
       each style in styles
         link(rel='stylesheet', href='http://c.weihub.com/css/'+style)
@@ -28,9 +28,10 @@ html
             a.navbar-brand(href='/') WeiHub
           .navbar-collapse.collapse(role='navigation')
             ul.nav.navbar-nav
-                li(class=nav === 'article' ? 'active' : '')
-                  a(href='/article')
-                    span.glyphicon.glyphicon-list-alt
+              li(class=nav === 'article' ? 'active' : '')
+                a(href='/article')
+                  span.glyphicon.glyphicon-list-alt
+                  span.hidden-xxs
                     |  文章
             //- form.navbar-form.navbar-left(action='http://www.google.com.hk/search', method='get', role='search')
             //-   .form-group
@@ -45,12 +46,14 @@ html
                 li
                   a#top-sign-out(href='/signout')
                     span.glyphicon.glyphicon-log-out
-                    |  退出
+                    span.hidden-xxs
+                      |  退出
               else 
                 li(class=nav === 'auth' ? 'active' : '')
                   a#top-sign-in(href='/auth')
                     span.glyphicon.glyphicon-log-in
-                    |  登录
+                    span.hidden-xxs
+                      |  登录
       block content
     .footer
       .container
@@ -65,9 +68,10 @@ html
             a(href='http://www.miibeian.gov.cn/', target='_blank') 粤ICP备12079626号
     script(src='http://c.weihub.com/js/require.js')
     script.
+      console.log(+ new Date);
       require.config({
         baseUrl: 'http://c.weihub.com/js/',
-        urlArgs: 'bust=main.8d97c',
+        urlArgs: 'bust=main.1c392',
         paths: {
           main: 'main-built'
         }
@@ -85,3 +89,4 @@ html
     if scripts
       each srcipt in scripts
         script(src=script)
+    block inlineScript

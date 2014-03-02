@@ -1,10 +1,13 @@
 var express = require('express')
   , fs = require('fs')
   , util = require('util')
-  , user = require('./routes/user')
+  , Promise = require('bluebird')
+  , ArticleController = require('./controllers/article')
+  , UserController = require('./controllers/user')
+  // , user = require('./routes/user')
   , oauth = require('./lib/oauth')
-  , article = require('./routes/article')
-  , comment = require('./routes/comment')
+  // , article = require('./routes/article')
+  // , comment = require('./routes/comment')
   , db = require('./lib/db')
   , conf = require('./config')
   , app = express()
@@ -24,6 +27,7 @@ main.enable('case sensitive routing');
 var logFormat = ':req[X-Real-IP] - - [:date] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" ":req[X-Forwarded-For]"';
 if (dev) {
   logFormat = 'dev';
+  Promise.longStackTraces();
 }
 main.use(express.logger({
   format: logFormat,
@@ -49,21 +53,8 @@ main.use(express.json());
 main.use(express.urlencoded());
 // main.use(express.multipart());
 main.use(express.methodOverride());
-main.use(user.load);
-
-main.use(main.router);
-// 404
-main.use(function(req, res, next){
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
-});
-// Error handler
-main.use(function(err, req, res, next){
-  var status = err.status || 500;
-  res.status(status);
-  res.render('error/4xx', {error: err});
-});
+// user auth
+main.use(UserController.auth);
 
 main.set('views', __dirname + '/views');
 main.set('view engine', 'jade');
@@ -121,8 +112,12 @@ main.get('/auth/redirect/:site', function(req, res, next){
 });
 
 oauth.list.forEach(function(site){
-  main.get('/auth/' + site, oauth.before, oauth[site].auth, user.check, function(req, res){
-    res.redirect(req.redirectUrl);
+  main.get('/auth/' + site, oauth.before, oauth[site].auth, UserController.authed, function(req, res){
+      var url = req.redirectUrl;
+      if (/^\/auth($|[\/\?#])/.test(url)) {
+        url = '/';
+      }
+      res.redirect(url);
   });
 });
 
@@ -142,8 +137,10 @@ main.get('/signout', function(req, res){
   });
 });
 
+ArticleController(main);
+
 // 文章列表
-main.get('/article', article.list, function(req, res){
+/*main.get('/article', article.list, function(req, res){
   res.locals.list.forEach(function(article){
     var date = new Date(+ article.create_time);
     article.str_create_time = date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate();
@@ -166,8 +163,8 @@ main.get('/article/:uri', article.load, comment.list, function(req, res){
     comment.str_create_time = date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate();
   });
   res.render('article/article');
-});
-
+});*/
+/*
 // 修改文章
 main.get('/article/:uri/edit', user.restrict, article.load, function(req, res){
   res.locals.update = true;
@@ -193,6 +190,29 @@ main.get('/article/:uri/comment', article.load, comment.list, function(req, res)
 main.post('/article/:uri/comment', user.restrict, article.load, comment.post, function(req, res){
   // res.send(res.locals.comment);
   res.redirect('/article/' + req.params.uri + '#comments');
+});*/
+
+// Google site verification
+main.get('/google040d868833adfa0a.html', function(req, res){
+  res.send('google-site-verification: google040d868833adfa0a.html');
+});
+
+main.use(main.router);
+// 404
+main.use(function(req, res, next){
+  console.log('Not Found');
+  var err = new Error('Not Found');
+  err.status = 404;
+  next(err);
+});
+// Error handler
+main.use(function(err, req, res, next){
+  console.log(err.stack);
+  var status = err.status || 500;
+  console.log(status);
+  res.status(status);
+  res.render('error/4xx', {error: err});
+  // res.end(status);
 });
 
 // 静态文件服务

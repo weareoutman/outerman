@@ -32,10 +32,11 @@ SET user:from:[id] [from]
 # SADD user:admin [id]
 */
 
-var db = require('../lib/db')
-  , Q = require('q')
+var Promise = require('bluebird')
   , _ = require('underscore')
   , crypto = require('crypto')
+  , db = require('../lib/db')
+  , randomBytes = Promise.promisify(crypto.randomBytes)
   , SIGN_LEN = 128
   , SIGN_ITE = 10000
   , FIELDS = {
@@ -72,26 +73,24 @@ var db = require('../lib/db')
     }
   };
 
-// enable long stack
-Q.longStackSupport = true;
-
 exports.check = function(req, res, next){
   var user = req.user;
-  Q.ninvoke(db, 'get', KEYS.fromUid2id(user.from, user.from_uid))
+  db.getAsync(KEYS.fromUid2id(user.from, user.from_uid))
   .then(function(id){
     if (id === null) {
-      return create(user);
+      return createAsync(user);
     } else {
       user.id = id;
+      return Promise.resolve();
     }
   })
   .then(function(){
-    return sign(req, res);
+    return signAsync(req, res);
   })
-  .fail(next)
-  .done(function(){
+  .then(function(){
     next();
-  });
+  })
+  .catch(next);
 };
 
 exports.load = function(req, res, next){
@@ -105,27 +104,29 @@ exports.load = function(req, res, next){
   if (! (uid && usign && usalt)) {
     return next();
   }
-  Q.ninvoke(db, 'hgetall', KEYS.id2auth(uid))
+  db.hgetallAsync(KEYS.id2auth(uid))
   .then(function(data){
+    var resolved = Promise.resolve();
     if (! data || data.salt !== usalt) {
-      return;
+      return resolved;
     }
     var sha1 = crypto.createHmac('sha1', usalt);
     sha1.update(usign);
     if (data.hash !== sha1.digest('base64')) {
-      return;
+      return resolved;
     }
-    return getUser(uid)
+    return getUserAsync(uid)
     .then(function(replies){
       var user = _.extend.apply(_, replies);
       req.session.user = user;
       res.locals.user = user;
+      return resolved;
     });
   })
-  .fail(next)
-  .done(function(){
+  .then(function(){
     next();
-  });
+  })
+  .catch(next);
 };
 
 exports.restrict = function(req, res, next) {
@@ -135,20 +136,20 @@ exports.restrict = function(req, res, next) {
   next();
 };
 
-function sign(req, res) {
+function signAsync(req, res) {
   var id = req.user.id
     , salt
     , pswd;
-  return Q.ninvoke(crypto, 'randomBytes', SIGN_LEN)
+  return randomBytes(SIGN_LEN)
   .then(function(buf){
     salt = buf.toString('base64');
-    return Q.ninvoke(crypto, 'randomBytes', SIGN_LEN);
+    return randomBytes(SIGN_LEN);
   })
   .then(function(buf){
     pswd = buf.toString('base64');
     var sha1 = crypto.createHmac('sha1', salt);
     sha1.update(pswd);
-    return Q.ninvoke(db, 'hmset', KEYS.id2auth(id), {
+    return db.hmsetAsync(KEYS.id2auth(id), {
       hash: sha1.digest('base64'),
       salt: salt
     });
@@ -158,11 +159,12 @@ function sign(req, res) {
     res.cookie('uid', '' + id, { maxAge: month });
     res.cookie('usign', pswd, { maxAge: month });
     res.cookie('usalt', salt, { maxAge: month });
+    return Promise.resolve();
   });
 }
 
-function create(user) {
-  return Q.ninvoke(db, 'incr', KEYS.CURSOR)
+function createAsync(user) {
+  return db.incrAsync(KEYS.CURSOR)
   .then(function(id){
     id = '' + id;
     user.id = id;
@@ -184,13 +186,13 @@ function create(user) {
     multi.set(KEYS.fromUid2id(user.from, user.from_uid), id);
     multi.sadd(KEYS.from2id(user.from), id);
     // }
-    return Q.ninvoke(multi, 'exec');
+    return Promise.promisify(multi.exec, multi)();
   });
 }
 
-function getUser(id) {
+function getUserAsync(id) {
   var multi = db.multi();
   multi.hgetall(KEYS.id2user(id));
   multi.hgetall(KEYS.id2more(id));
-  return Q.ninvoke(multi, 'exec');
+  return Promise.promisify(multi.exec, multi)();
 }
