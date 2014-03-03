@@ -31,9 +31,7 @@ block content
 block inlineScript
   script.
     require(['main'], function(){
-      console.log(+ new Date);
       require(['jquery'], function($){
-        console.log(+ new Date);
         var form = $('#form-article')
           , draft = $('#input-draft');
         $('#btn-draft').click(function(){

@@ -17,8 +17,7 @@ exports.auth = function(req, res, next){
       res.locals.user = req.session.user = user;
     }
     next();
-  })
-  .catch(next);
+  }).catch(next);
 };
 
 exports.restrict = function(req, res, next) {

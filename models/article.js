@@ -75,17 +75,15 @@ function post(body, user) {
   data.update_time = data.create_time = Date.now();
 
   // markdown to html, and cut out the summary
-  return processAsync(data)
+  return process(data)
   .then(function(){
     // incr id cursor
     return db.incrAsync(KEYS.CURSOR);
-  })
-  .then(function(id){
+  }).then(function(id){
     data.id = id;
     // check if uri existed
     return db.getAsync(KEYS.uri2id(data.uri));
-  })
-  .then(function(exist){
+  }).then(function(exist){
     if (exist) {
       throw new Error('uri existed');
     }
@@ -102,8 +100,7 @@ function post(body, user) {
       });
     }
     return Promise.promisify(multi.exec, multi)();
-  })
-  .then(function(){
+  }).then(function(){
     // get article from db
     return db.hgetallAsync(KEYS.id2article(data.id));
   });
@@ -120,7 +117,7 @@ function put(old, body, user) {
   // delete res.locals.article;
 
   // markdown to html, and cut out the summary
-  return processAsync(data)
+  return process(data)
   .then(function(){
     var multi = db.multi()
       , keyOldUri2id = KEYS.uri2id(old.uri)
@@ -145,8 +142,7 @@ function put(old, body, user) {
       });
     }
     return Promise.promisify(multi.exec, multi)();
-  })
-  .then(function(){
+  }).then(function(){
     // get article from db
     return db.hgetallAsync(KEYS.id2article(id));
   });
@@ -187,7 +183,7 @@ var markedOptions = {
 };
 
 // markdown to html, and cut out the summary
-function processAsync(data) {
+function process(data) {
   // Translate markdown to html
   return markedAsync(data.content, markedOptions)
   .then(function(html){

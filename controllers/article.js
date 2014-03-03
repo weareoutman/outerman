@@ -4,7 +4,7 @@ var Promise = require('bluebird')
   , ArticleModel = require('../models/article')
   , UserController = require('./user');
 
-module.exports = function(app) {
+exports.use = function(app) {
   // 文章列表
   app.get('/article', list, function(req, res){
     res.render('article/list');
@@ -58,8 +58,7 @@ function list(req, res, next) {
     });
     res.locals.list = list;
     next();
-  })
-  .catch(next);
+  }).catch(next);
 }
 
 function get(req, res, next) {
@@ -69,8 +68,7 @@ function get(req, res, next) {
     article.str_create_time = date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate();
     res.locals.article = article;
     next();
-  })
-  .catch(next);
+  }).catch(next);
 }
 
 function post(req, res, next) {
@@ -78,8 +76,7 @@ function post(req, res, next) {
   .then(function(article){
     res.locals.article = article;
     next();
-  })
-  .catch(next);
+  }).catch(next);
 }
 
 function put(req, res, next) {
@@ -87,6 +84,5 @@ function put(req, res, next) {
   .then(function(article){
     res.locals.article = article;
     next();
-  })
-  .catch(next);
+  }).catch(next);
 }
