@@ -12,6 +12,7 @@ confList.forEach(function(name){
 });
 
 _.each(confs, function(conf, name){
+  console.log(conf);
   gulp.task('rjs:' + name, function(){
     requirejs.optimize(conf, function(out){
       console.log('requirejs optimized: ', out);
@@ -26,7 +27,11 @@ _.each(confs, function(conf, name){
 
 gulp.task('watch', function(){
   _.each(confs, function(conf, name){
-    gulp.watch([].concat(conf.mainConfigFile || conf.cssIn), ['bust:' + name]);
+    var path = conf.cssIn;
+    if (! path) {
+      path = conf.baseUrl + '/' + name + '.js';
+    }
+    gulp.watch([path], ['bust:' + name]);
   });
 });
 

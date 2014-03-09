@@ -1,8 +1,16 @@
 extends ../layout.jade
 
 block vars
-  - var title = '出错了'
+  - var title = '系统出错了'
 
-blick content
+block content
   .container
-    .alert.alert-warning= '出错了！' + (error || '')
+    .alert.alert-danger
+      strong= '系统出错了！'
+      = error.name + ' : ' + error.message
+      |  
+      a.btn.btn-xs.btn-link(href='/')
+        span.glyphicon.glyphicon-home
+        |  返回首页
+    if DEV
+      pre= error.stack

@@ -5,6 +5,8 @@ var express = require('express')
   , UserController = require('./controllers/user')
   , ArticleController = require('./controllers/article')
   , db = require('./lib/db')
+  , errors = require('./lib/errors')
+  , ClientError = errors.ClientError
   , conf = require('./config')
   , app = express()
   , main = express()
@@ -64,6 +66,10 @@ main.get('/robots.txt', function(req, res){
   });
 });
 
+main.get('/README', function(req, res){
+  res.sendfile(__dirname + '/README.md');
+});
+
 // 登录/验证
 AuthController.use(main);
 
@@ -77,18 +83,11 @@ main.get('/google040d868833adfa0a.html', function(req, res){
 
 // 404
 main.use(function(req, res, next){
-  console.log('Not Found');
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
+  next(new ClientError(404));
 });
-// Error handler
-main.use(function(err, req, res, next){
-  var status = err.status || 500;
-  res.status(status);
-  res.render('error/4xx', {error: err});
-  // res.end(status);
-});
+
+// Error handling
+main.use(errors);
 
 // 静态文件服务
 var staticServer = express();
@@ -112,7 +111,7 @@ staticServer.use(function(req, res, next){
   next();
 });
 staticServer.use(express.static(__dirname + '/public', {
-  maxAge: 8.64e7 // 1天
+  maxAge: 2.592e9 // 30天
 }));
 
 var wwwServer = express();

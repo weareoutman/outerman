@@ -1,0 +1,40 @@
+extends ./layout.jade
+
+block vars
+  - var title = 'WeiHub'
+  - var scripts = ['http://c.weihub.com/js/index.js']
+
+block content
+  style.
+    #canvas {
+      height: 360px;
+      overflow: hidden;
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+    #canvas-container {
+      position: relative;
+    }
+    #canvas-container canvas,
+    #canvas-container svg {
+      position: absolute;
+      top: 0px;
+      left: 0px;
+    }
+    .canvas-mesh path {
+      fill: none;
+      stroke: #fff;
+      stroke-width: 3px;
+    }
+    .canvas-anchor path {
+      fill: none;
+      pointer-events: all;
+    }
+    .canvas-anchor path:hover {
+      stroke: #5bc0de;
+      stroke-width: 3px;
+    }
+  .container
+    h1 你好，世界
+  #canvas
+    #canvas-container

@@ -24,6 +24,7 @@ var Promise = require('bluebird')
   , marked = require('marked')
   , hljs = require('highlight.js')
   , db = require('../lib/db')
+  , ClientError = require('../lib/errors').ClientError
   , markedAsync = Promise.promisify(marked)
   , summary_max_chars = 90
   , KEYS = {
@@ -61,7 +62,7 @@ function get(uri) {
   return db.getAsync(KEYS.uri2id(uri))
   .then(function(id){
     if (! id) {
-      throw new Error('article not found');
+      throw new ClientError(404);
     }
     return db.hgetallAsync(KEYS.id2article(id));
   });
@@ -85,7 +86,7 @@ function post(body, user) {
     return db.getAsync(KEYS.uri2id(data.uri));
   }).then(function(exist){
     if (exist) {
-      throw new Error('uri existed');
+      throw new ClientError(409);
     }
     // save
     var multi = db.multi()
@@ -146,7 +147,7 @@ function put(old, body, user) {
     // get article from db
     return db.hgetallAsync(KEYS.id2article(id));
   });
-};
+}
 
 // redefine marked renderer
 var renderer = new marked.Renderer();

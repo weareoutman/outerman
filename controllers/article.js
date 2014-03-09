@@ -5,44 +5,44 @@ var Promise = require('bluebird')
   , UserController = require('./user');
 
 exports.use = function(app) {
-  // 文章列表
+  // Article list
   app.get('/article', list, function(req, res){
     res.render('article/list');
   });
 
-  // 发表新文章
+  // To post an article
   app.get('/article/edit', UserController.restrict, function(req, res){
     res.render('article/edit');
   });
 
-  // 查看单篇文章
+  // View an article
   app.get('/article/:uri', get, function(req, res){
     res.render('article/article');
   });
 
-  // 修改文章
+  // To update an article
   app.get('/article/:uri/edit', UserController.restrict, get, function(req, res){
     res.locals.update = true;
     res.render('article/edit');
   });
 
-  // 提交发表新文章
+  // Do post an article
   app.post('/article', UserController.restrict, post, function(req, res){
     res.redirect('/article/' + res.locals.article.uri);
   });
 
-  // 提交修改文章
+  // Do update an article
   app.put('/article/:uri', UserController.restrict, get, put, function(req, res){
     res.redirect('/article/' + res.locals.article.uri);
   });
 
   // TODO: Comments
-  // 评论列表
+  // Comment list
   /*main.get('/article/:uri/comment', get, comment.list, function(req, res){
     res.send(res.locals.list);
   });
 
-  // 提交评论
+  // Do post a comment
   main.post('/article/:uri/comment', UserController.restrict, get, comment.post, function(req, res){
     // res.send(res.locals.comment);
     res.redirect('/article/' + req.params.uri + '#comments');

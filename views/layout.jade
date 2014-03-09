@@ -67,10 +67,12 @@ html
           .pull-right.hidden-xs
             a(href='http://www.miibeian.gov.cn/', target='_blank') 粤ICP备12079626号
     script(src='http://c.weihub.com/js/require.js')
+    script
+      include ../public/js/config.js
     script.
       require.config({
         baseUrl: 'http://c.weihub.com/js/',
-        urlArgs: 'bust=main.1c392',
+        urlArgs: 'bust=main.8c80e',
         paths: {
           main: 'main-built'
         }
@@ -86,6 +88,6 @@ html
         ga('create', 'UA-48261249-1', 'weihub.com');
         ga('send', 'pageview');
     if scripts
-      each srcipt in scripts
+      each script,i in scripts
         script(src=script)
     block inlineScript

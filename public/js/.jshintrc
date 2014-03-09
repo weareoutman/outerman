@@ -1,4 +1,5 @@
 {
   "node": false,
-  "browser": true
+  "browser": true,
+  "laxcomma": true
 }
