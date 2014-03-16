@@ -179,29 +179,33 @@ require(['d3'], function(d3) {
   var uw = 160
     , uh = 120
     , x = 8
-    , y = 3
+    , y = 4
+    // , x = 4
+    // , y = 2
     , ix = 6
     , iy = 4
     , width = 256
     , height = 192
+    , sw = 416
+    , sh = 312
     , pieces = []
     , t, r, b, l
     , shuffle = d3.range(0, ix * iy);
-  console.log(shuffle);
+  // console.log(shuffle);
   shuffle = d3.shuffle(shuffle);
-  console.log(shuffle);
+  // console.log(shuffle);
 
   var container = d3.select('#canvas-container');
 
   var canvas = container.append('canvas')
-    .attr('width', width * x)
-    .attr('height', height * y);
+    .attr('width', uw * x)
+    .attr('height', uh * y);
 
   var context = canvas.node().getContext('2d');
 
   var svg = container.append("svg")
-    .attr('width', width * x)
-    .attr('height', height * y);
+    .attr('width', uw * x)
+    .attr('height', uh * y);
 
   var mesh = svg.append('g')
     .attr('class', 'canvas-mesh')
@@ -232,7 +236,8 @@ require(['d3'], function(d3) {
 
   var img = new Image();
   img.onload = ready;
-  img.src = 'http://c.weihub.com/images/canvas.png';
+  // img.src = 'http://c.weihub.com/images/canvas.png';
+  img.src = 'http://c.weihub.com/images/puzzle.png';
 
   function ready() {
     var data = [];
@@ -254,11 +259,35 @@ require(['d3'], function(d3) {
         context.closePath();
         // context.stroke();
         context.clip();
-        var n = j * x + i
+        /*var n = j * x + i
           , m = shuffle[n];
-        context.drawImage(img, (m % ix) * width, Math.floor(m / ix) * height, width, height, (uw - width) / 2, (uh - height) / 2, width, height);
+
+        var ii = m % ix
+          , jj = Math.floor(m / ix);*/
+
+        var j0 = Math.floor(j / 2)
+          , j1 = j % 2
+          , i0 = Math.floor(i / 2)
+          , i1 = i % 2
+          , n = j0 * x / 2 + i0
+          , m = shuffle[n]
+          , ii = m % ix
+          , jj = Math.floor(m / ix);
+
+        var sx = ii * sw
+          , sy = jj * sh;
+
+        if (i1) {
+          sx += sw - width;
+        }
+        if (j1) {
+          sy += sh - height;
+        }
+
+        // context.drawImage(img, (m % ix) * width, Math.floor(m / ix) * height, width, height, (uw - width) / 2, (uh - height) / 2, width, height);
+        context.drawImage(img, sx, sy, width, height, (uw - width) / 2, (uh - height) / 2, width, height);
         context.restore();
-        data[n] = piece;
+        data[j*x+i] = piece;
       });
     });
 

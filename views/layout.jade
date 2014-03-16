@@ -6,7 +6,7 @@ html
     title= title
     meta(http-equiv='X-UA-Compatible', content='IE=edge')
     meta(name='viewport', content='width=device-width, initial-scale=1.0')
-    link(rel='stylesheet', href='http://c.weihub.com/css/style-built.css?bust=style.294b6')
+    link(rel='stylesheet', href='http://c.weihub.com/css/style-built.css?bust=style.23bdf')
     if styles
       each style in styles
         link(rel='stylesheet', href='http://c.weihub.com/css/'+style)
@@ -39,7 +39,7 @@ html
             ul.nav.navbar-nav.navbar-right
               if user
                 li
-                  a
+                  a(href=user && user.profile_url || '#')
                     span.glyphicon.glyphicon-user
                     |  
                     = user.fullname
@@ -72,7 +72,7 @@ html
     script.
       require.config({
         baseUrl: 'http://c.weihub.com/js/',
-        urlArgs: 'bust=main.8c80e',
+        urlArgs: 'bust=main.1053b',
         paths: {
           main: 'main-built'
         }

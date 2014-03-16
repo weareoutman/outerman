@@ -25,6 +25,7 @@ var logFormat = ':req[X-Real-IP] - - [:date] ":method :url HTTP/:http-version" :
 if (dev) {
   logFormat = 'dev';
   Promise.longStackTraces();
+  // main.locals.pretty = true;
 }
 main.use(express.logger({
   format: logFormat,

@@ -46,7 +46,7 @@ exports.authed = function(req, res, next){
       res.cookie('uid', '' + user.id, { maxAge: month });
       res.cookie('usign', pswd, { maxAge: month });
       res.cookie('usalt', salt, { maxAge: month });
-      return Promise.resolve();
+      return;
     });
   }).then(function(){
     next();

@@ -2,6 +2,7 @@
 
 var Promise = require('bluebird')
   , ArticleModel = require('../models/article')
+  , CommentModel = require('../models/comment')
   , UserController = require('./user');
 
 exports.use = function(app) {
@@ -36,17 +37,20 @@ exports.use = function(app) {
     res.redirect('/article/' + res.locals.article.uri);
   });
 
-  // TODO: Comments
   // Comment list
-  /*main.get('/article/:uri/comment', get, comment.list, function(req, res){
-    res.send(res.locals.list);
+  app.get('/article/:uri/comment', get, listComments, function(req, res){
+    res.locals.commentList.forEach(function(comment){
+      var date = new Date(+ comment.create_time);
+      comment.str_create_time = date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate();
+    });
+    res.send(res.locals.commentList);
   });
 
   // Do post a comment
-  main.post('/article/:uri/comment', UserController.restrict, get, comment.post, function(req, res){
+  app.post('/article/:uri/comment', /*UserController.restrict,*/ get, postComment, function(req, res){
     // res.send(res.locals.comment);
-    res.redirect('/article/' + req.params.uri + '#comments');
-  });*/
+    res.send(res.locals.comment);
+  });
 };
 
 function list(req, res, next) {
@@ -72,7 +76,7 @@ function get(req, res, next) {
 }
 
 function post(req, res, next) {
-  ArticleModel.post(res.locals.user, req.body)
+  ArticleModel.post(req.body, res.locals.user)
   .then(function(article){
     res.locals.article = article;
     next();
@@ -83,6 +87,22 @@ function put(req, res, next) {
   ArticleModel.put(res.locals.article, req.body, res.locals.user)
   .then(function(article){
     res.locals.article = article;
+    next();
+  }).catch(next);
+}
+
+function listComments(req, res, next) {
+  CommentModel.list(res.locals.article.id)
+  .then(function(commentList){
+    res.locals.commentList = commentList;
+    next();
+  }).catch(next);
+}
+
+function postComment(req, res, next) {
+  CommentModel.post(res.locals.article.id, req.body, res.locals.user, req.ip)
+  .then(function(comment){
+    res.locals.comment = comment;
     next();
   }).catch(next);
 }

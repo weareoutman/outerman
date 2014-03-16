@@ -47,7 +47,7 @@ function list() {
   return db.lrangeAsync(KEYS.LIST, 0, -1)
   .then(function(ids){
     if (ids.length === 0) {
-      return Promise.resolve([]);
+      return [];
     }
     var multi = db.multi();
     ids.forEach(function(id){
@@ -78,19 +78,18 @@ function post(body, user) {
   // markdown to html, and cut out the summary
   return process(data)
   .then(function(){
+    // check if uri existed
+    return db.existsAsync(KEYS.uri2id(data.uri));
+  }).then(function(exists){
+    if (exists) {
+      throw new ClientError(409);
+    }
     // incr id cursor
     return db.incrAsync(KEYS.CURSOR);
   }).then(function(id){
-    data.id = id;
-    // check if uri existed
-    return db.getAsync(KEYS.uri2id(data.uri));
-  }).then(function(exist){
-    if (exist) {
-      throw new ClientError(409);
-    }
     // save
-    var multi = db.multi()
-      , id = data.id;
+    var multi = db.multi();
+    data.id = id;
     multi.hmset(KEYS.id2article(id), data);
     multi.set(KEYS.uri2id(data.uri), id);
     multi.lpush(KEYS.LIST, id);
@@ -126,7 +125,7 @@ function put(old, body, user) {
       , oldTags = old.tags && old.tags.split(',');
     if (keyOldUri2id !== keyNewUri2id) {
       // rename uri
-      multi.rename(keyOldUri2id, keyNewUri2id);
+      multi.renamenx(keyOldUri2id, keyNewUri2id);
     }
     multi.hmset(KEYS.id2article(id), data);
     multi.zadd(KEYS.UPDATE_TIME, data.update_time, id);
@@ -202,7 +201,7 @@ function process(data) {
       }
     }
     data.summary = cleaned.substr(0, index);
-    return Promise.resolve();
+    return;
   });
 }
 

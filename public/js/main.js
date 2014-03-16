@@ -1,4 +1,4 @@
-require(['jquery', 'bootstrap'/*, 'backbone'*/], function($){
+require(['jquery', 'bootstrap', 'backbone'], function($){
   var path = location.pathname
     , search = location.search;
   if (/^\/auth($|\/)/.test(location.pathname)) {

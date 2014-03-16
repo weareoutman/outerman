@@ -10,7 +10,7 @@ var util = require('util')
   , oauthMap = {
     weibo: 'https://api.weibo.com/oauth2/authorize?client_id=%s&response_type=code&redirect_uri=%s&state=%s',
     qq: 'https://graph.qq.com/oauth2.0/authorize?client_id=%s&response_type=code&redirect_uri=%s&state=%s',
-    github: 'https://github.com/login/oauth/authorize?scope=user:email&client_id=%s&redirect_uri=%s&state=%s',
+    github: 'https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s&state=%s',
     instagram: 'https://api.instagram.com/oauth/authorize/?client_id=%s&response_type=code&redirect_uri=%s&state=%s'
   };
 

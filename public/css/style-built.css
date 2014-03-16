@@ -375,3 +375,101 @@ textarea.text-code {
 footer .pull-left a {
   margin-left: 0.5em;
 }
+.btn-auth {
+  display: inline-block;
+  width: 48px;
+  height: 48px;
+  background-size: 32px 32px;
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 1000px;
+}
+.btn-auth + .btn-auth {
+  margin-left: 8px;
+}
+.btn-auth:hover {
+  border-color: #428bca;
+}
+.btn-auth-weibo {
+  background-image: url(../images/weibo.png);
+}
+.btn-auth-qq {
+  background-image: url(../images/qq.png);
+}
+.btn-auth-github {
+  background-image: url(../images/github.png);
+}
+.btn-auth-instagram {
+  background-image: url(../images/instagram.png);
+}
+@media (-webkit-min-device-pixel-ratio: 2),(min-resolution: 2dppx) {
+  .btn-auth-weibo {
+    background-image: url(../images/weibo@2x.png);
+  }
+}
+@media (-webkit-min-device-pixel-ratio: 2),(min-resolution: 2dppx) {
+  .btn-auth-qq {
+    background-image: url(../images/qq@2x.png);
+  }
+}
+@media (-webkit-min-device-pixel-ratio: 2),(min-resolution: 2dppx) {
+  .btn-auth-github {
+    background-image: url(../images/github@2x.png);
+  }
+}
+@media (-webkit-min-device-pixel-ratio: 2),(min-resolution: 2dppx) {
+  .btn-auth-instagram {
+    background-image: url(../images/instagram@2x.png);
+  }
+}
+.media-profile {
+  background-color: #eee;
+  border-radius: 1000px;
+  overflow: hidden;
+}
+.media-profile > .glyphicon-user {
+  font-size: 40px;
+  margin: 12px;
+}
+.comment-btns {
+  padding-bottom: 8px;
+  position: relative;
+}
+.comment-btns .col-auth {
+  position: absolute;
+}
+.comment-btns .col-name {
+  margin: 0 70px 0 235px;
+}
+.comment-btns .col-submit {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+.comment-btns .btn-auth {
+  margin-top: -7px;
+}
+.comment-btns-signed .col-submit {
+  margin-top: 10px;
+  position: static;
+}
+.comment-btns-signed .col-submit > .text-muted {
+  display: none;
+}
+@media (max-width: 767px) {
+  .comment-btns .col-submit,
+  .comment-btns .col-auth {
+    position: static;
+  }
+  .comment-btns .col-name {
+    margin: 0;
+  }
+  .comment-btns .col-submit {
+    margin-top: 10px;
+  }
+  .col-submit > .text-muted {
+    display: none;
+  }
+}

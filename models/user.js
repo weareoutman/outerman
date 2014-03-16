@@ -41,7 +41,7 @@ var Promise = require('bluebird')
   , SIGN_LEN = 128
   , FIELDS = {
     BASE: ['id', 'email', 'username', 'fullname'],
-    MORE: ['gender', 'avatar', 'avatar_sm', 'avatar_lg', 'create_time'],
+    MORE: ['from', 'profile_url', 'gender', 'avatar', 'avatar_sm', 'avatar_lg', 'create_time'],
     FROM: ['token', 'from_uid', 'expires_at']
   }
   , KEYS = {
@@ -74,19 +74,18 @@ var Promise = require('bluebird')
   };
 
 function auth(uid, usign, usalt) {
-  var resolvedNull = Promise.resolve(null);
   if (! (uid && usign && usalt)) {
-    return resolvedNull;
+    return Promise.resolve(null);
   }
   return db.hgetallAsync(KEYS.id2auth(uid))
   .then(function(data){
     if (! data || data.salt !== usalt) {
-      return resolvedNull;
+      return null;
     }
     var sha1 = crypto.createHmac('sha1', usalt);
     sha1.update(usign);
     if (data.hash !== sha1.digest('base64')) {
-      return resolvedNull;
+      return null;
     }
     return get(uid);
   });
@@ -113,7 +112,7 @@ function post(user) {
   .then(function(id){
     if (id !== null) {
       user.id = id;
-      return Promise.resolve();
+      return put(user);
     }
     return db.incrAsync(KEYS.CURSOR)
     .then(function(id){
@@ -142,13 +141,25 @@ function post(user) {
   });
 }
 
+function put(user) {
+  var id = user.id
+    , base = _.pick(user, FIELDS.BASE)
+    , more = _.pick(user, FIELDS.MORE)
+    , from = _.pick(user, FIELDS.FROM)
+    , multi = db.multi();
+  multi.hmset(KEYS.id2user(id), base);
+  multi.hmset(KEYS.id2more(id), more);
+  multi.hmset(KEYS.id2from(id), from);
+  return Promise.promisify(multi.exec, multi)();
+}
+
 function get(id) {
   var multi = db.multi();
   multi.hgetall(KEYS.id2user(id));
   multi.hgetall(KEYS.id2more(id));
   return Promise.promisify(multi.exec, multi)()
   .then(function(replies){
-    return Promise.resolve(_.extend.apply(_, replies));
+    return _.extend.apply(_, replies);
   });
 }
 
