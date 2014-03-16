@@ -40,6 +40,7 @@ var Promise = require('bluebird')
   , LIMIT_IP_COUNT = 2
   , LIMIT_USER_EXPIRE = 600
   , LIMIT_USER_COUNT = 2
+  , MAX_CONTENT_LENGTH = 500
   , KEYS = {
     CURSOR: 'comment:cursor',
     id2comment: function(id) {
@@ -138,6 +139,9 @@ exports.post = function(articleId, body, user, ip) {
   }
   if (! data.content || (! user && ! data.guest_name)) {
     return Promise.reject(new ClientError(400));
+  }
+  if (data.content.length > MAX_CONTENT_LENGTH) {
+    return Promise.reject(new ClientError(413));
   }
   return process(data)
   .then(function(html){

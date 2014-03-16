@@ -63,11 +63,14 @@ require(['main'], function(){
           error: function(col, res){
             var msg;
             switch (res.status) {
+              case 403:
+                msg = '你消停点！';
+                break;
               case 409:
                 msg = '你是复读机吗？';
                 break;
-              case 403:
-                msg = '休息一会儿！';
+              case 413:
+                msg = '你的话太多了！';
                 break;
               default:
                 msg = res.statusText || 'Unknow Error';
