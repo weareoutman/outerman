@@ -28,20 +28,20 @@ require(['main'], function(){
           , user = $.trim(this.$user.val() || '');
         if (! content) {
           var textParent = this.$text.parent();
-          textParent.addClass('has-error')
+          textParent.addClass('has-error has-feedback')
               .append('<span class="glyphicon glyphicon-warning-sign form-control-feedback" style="bottom:0"></span>');
           this.$text.one('change input', function(){
-            textParent.removeClass('has-error')
+            textParent.removeClass('has-error has-feedback')
                 .children('.form-control-feedback').remove();
           }).focus();
           return;
         }
         if (this.$user.length > 0 && ! user) {
           var userParent = this.$user.parent();
-          userParent.addClass('has-error')
+          userParent.addClass('has-error has-feedback')
               .append('<span class="glyphicon glyphicon-warning-sign form-control-feedback" style="top:0"></span>');
           this.$user.one('change input', function(){
-            userParent.removeClass('has-error')
+            userParent.removeClass('has-error has-feedback')
                 .children('.form-control-feedback').remove();
           }).focus();
           return;

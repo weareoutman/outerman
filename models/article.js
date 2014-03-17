@@ -26,7 +26,7 @@ var Promise = require('bluebird')
   , db = require('../lib/db')
   , ClientError = require('../lib/errors').ClientError
   , markedAsync = Promise.promisify(marked)
-  , summary_max_chars = 90
+  , MAX_SUMMARY_LENGTH = 180
   , KEYS = {
     CURSOR: 'article:cursor',
     LIST: 'article:list',
@@ -70,7 +70,7 @@ function get(uri) {
 
 // post an article
 function post(body, user) {
-  var data = _.pick(body, 'uri', 'title', 'content', 'tags')
+  var data = _.pick(body, 'uri', 'title', 'content', 'summary', 'tags')
     , tags = data.tags && data.tags.split(',');
   data.user_id = user.id;
   data.update_time = data.create_time = Date.now();
@@ -108,7 +108,7 @@ function post(body, user) {
 
 // update an article
 function put(old, body, user) {
-  var data = _.pick(body, 'uri', 'title', 'content', 'tags')
+  var data = _.pick(body, 'uri', 'title', 'content', 'summary', 'tags')
     , tags = data.tags && data.tags.split(',')
     , id = old.id;
   data.user_id = user.id;
@@ -188,20 +188,23 @@ function process(data) {
   return markedAsync(data.content, markedOptions)
   .then(function(html){
     data.html = html;
-    // Cut out the summary
-    var cleaned = html.replace(/<[^>]*>/g, '')
-      // Treat the Chinese char as double
-      , count = summary_max_chars * 2
-      , index = -1;
-    while (count > 0) {
-      if (cleaned.charCodeAt(index += 1) > 0x4dff) {
-        count -= 2;
-      } else {
-        count -= 1;
+    if (data.summary) {
+      data.summary = data.summary.substr(0, MAX_SUMMARY_LENGTH);
+    } else {
+      // Cut out the summary
+      var cleaned = html.replace(/<[^>]*>/g, '')
+        // Treat the Chinese char as double
+        , count = MAX_SUMMARY_LENGTH
+        , index = -1;
+      while (count > 0) {
+        if (cleaned.charCodeAt(index += 1) > 0x4dff) {
+          count -= 2;
+        } else {
+          count -= 1;
+        }
       }
+      data.summary = cleaned.substr(0, index);
     }
-    data.summary = cleaned.substr(0, index);
-    return;
   });
 }
 

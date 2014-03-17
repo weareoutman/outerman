@@ -41,6 +41,7 @@ var Promise = require('bluebird')
   , LIMIT_USER_EXPIRE = 600
   , LIMIT_USER_COUNT = 2
   , MAX_CONTENT_LENGTH = 500
+  , MAX_GUEST_NAME_LENGTH = 32
   , KEYS = {
     CURSOR: 'comment:cursor',
     id2comment: function(id) {
@@ -111,7 +112,11 @@ exports.list = function(articleId){
 
 // post a comment on an article
 exports.post = function(articleId, body, user, ip) {
-  var data = _.pick(body, 'content', 'reply_id')
+  var data = {
+      content: ('' + (body.content || '')).trim()
+    }
+    , replyId = '' + (body.reply_id || '')
+    , guestName = ('' + (body.user || '')).trim().substr(0, MAX_GUEST_NAME_LENGTH)
     , hash
     , hashKey
     , limitKey
@@ -126,16 +131,16 @@ exports.post = function(articleId, body, user, ip) {
     limitExpire = LIMIT_USER_EXPIRE;
     limitCount = LIMIT_USER_COUNT;
   } else {
-    data.guest_name = body.user;
+    // limit the guest name char length
+    data.guest_name = guestName;
     hashKey = KEYS.hashIp(ip);
     limitKey = KEYS.limitIp(ip);
     limitExpire = LIMIT_IP_EXPIRE;
     limitCount = LIMIT_IP_COUNT;
   }
   data.create_time = Date.now();
-  data.content = ('' + (data.content || '')).trim();
-  if (data.reply_id) {
-    data.reply_id = '' + data.reply_id;
+  if (replyId) {
+    data.reply_id = replyId;
   }
   if (! data.content || (! user && ! data.guest_name)) {
     return Promise.reject(new ClientError(400));

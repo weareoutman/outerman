@@ -3,12 +3,12 @@
 @import url('hljs-github.css');
 
 /* navbar collapsing */
-@media (min-width: 320px) {
+/*@media (min-width: 540px) {
   .navbar-header {
     float: left;
   }
 }
-@media (min-width: 320px) {
+@media (min-width: 540px) {
   .navbar-collapse {
     width: auto;
     border-top: 0;
@@ -30,7 +30,7 @@
     padding-left: 0;
   }
 }
-@media (min-width: 320px) {
+@media (min-width: 540px) {
   .container > .navbar-header,
   .container-fluid > .navbar-header,
   .container > .navbar-collapse,
@@ -39,18 +39,18 @@
     margin-left: 0;
   }
 }
-@media (min-width: 320px) {
+@media (min-width: 540px) {
   .navbar > .container .navbar-brand,
   .navbar > .container-fluid .navbar-brand {
     margin-left: -15px;
   }
 }
-@media (min-width: 320px) {
+@media (min-width: 540px) {
   .navbar-toggle {
     display: none;
   }
 }
-@media (min-width: 320px) {
+@media (min-width: 540px) {
   .navbar-nav {
     float: left;
     margin: 0;
@@ -66,7 +66,7 @@
     margin-right: -15px;
   }
 }
-@media (min-width: 320px) {
+@media (min-width: 540px) {
   .navbar-left {
     float: left !important;
   }
@@ -78,13 +78,14 @@
   .hidden-xxs {
     display: none !important;
   }
-}
+}*/
 
 @font-face {
   font-family: 'Audiowide';
   src: url('../fonts/Audiowide.eot');
   src: url('../fonts/Audiowide.eot?#iefix') format('embedded-opentype'), url('../fonts/Audiowide.woff') format('woff'), url('../fonts/Audiowide.ttf') format('truetype');
 }
+.font-audiowid,
 .navbar-brand {
   font-family: 'Audiowide','Helvetica Neue',Helvetica,Arial,sans-serif;
 }
@@ -186,8 +187,13 @@ footer .pull-left a {
   border-radius: 1000px;
   overflow: hidden;
 }
-.media-profile > .glyphicon-user {
+.media-profile > .glyphicon {
+  display: block;
   font-size: 40px;
+  line-height: 1;
+  text-align: center;
+  width: 40px;
+  height: 40px;
   margin: 12px;
 }
 .comment-btns {

@@ -6,7 +6,7 @@ html
     title= title
     meta(http-equiv='X-UA-Compatible', content='IE=edge')
     meta(name='viewport', content='width=device-width, initial-scale=1.0')
-    link(rel='stylesheet', href='http://weihub.com/css/style-built.css?bust=style.23bdf')
+    link(rel='stylesheet', href='http://weihub.com/css/style-built.css?bust=style.2f1b9')
     if styles
       each style in styles
         link(rel='stylesheet', href='http://weihub.com/css/'+style)
@@ -31,8 +31,7 @@ html
               li(class=nav === 'article' ? 'active' : '')
                 a(href='/article')
                   span.glyphicon.glyphicon-list-alt
-                  span.hidden-xxs
-                    |  文章
+                  |  文章
             //- form.navbar-form.navbar-left(action='http://www.google.com.hk/search', method='get', role='search')
             //-   .form-group
             //-     input.form-control(type='search', name='q', autocapitalize='off', autocomplete='off', spellcheck='false', placeholder='搜索')
@@ -46,20 +45,19 @@ html
                 li
                   a#top-sign-out(href='/signout')
                     span.glyphicon.glyphicon-log-out
-                    span.hidden-xxs
-                      |  退出
+                    |  退出
               else 
                 li(class=nav === 'auth' ? 'active' : '')
                   a#top-sign-in(href='/auth')
                     span.glyphicon.glyphicon-log-in
-                    span.hidden-xxs
-                      |  登录
+                    |  登录
       block content
     .footer
       .container
         footer
           .pull-left
-            | &copy; Wang Shenwei
+            | &copy; Wang Shenwei &nbsp; 
+            span.text-muted 联系我:
             a(href='http://weibo.com/wangshenwei') 微博
             a(href='https://github.com/weareoutman') GitHub
             a(href='http://instagram.com/weareoutman') Instagram

@@ -14,6 +14,9 @@ block content
         label(for='textarea-article-content') 内容
         textarea#textarea-article-content.form-control.text-code(name='content', rows='8', placeholder='内容')= update ? article.content : ''
       .form-group
+        label(for='textarea-article-summary') 摘要
+        textarea#textarea-article-summary.form-control.text-code(name='summary', rows='2', placeholder='摘要')= update ? article.summary : ''
+      .form-group
         label(for='input-article-uri') 链接名
         input#input-article-uri.form-control(name='uri', type='text', placeholder='链接名', value=update ? article.uri : '')
       .form-group
