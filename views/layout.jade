@@ -6,14 +6,14 @@ html
     title= title
     meta(http-equiv='X-UA-Compatible', content='IE=edge')
     meta(name='viewport', content='width=device-width, initial-scale=1.0')
-    link(rel='stylesheet', href='http://c.weihub.com/css/style-built.css?bust=style.23bdf')
+    link(rel='stylesheet', href='http://weihub.com/css/style-built.css?bust=style.23bdf')
     if styles
       each style in styles
-        link(rel='stylesheet', href='http://c.weihub.com/css/'+style)
+        link(rel='stylesheet', href='http://weihub.com/css/'+style)
     // HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries
     != '<!--[if lt IE 9]>'
-    != '<script src="http://c.weihub.com/js/html5shiv.js"></script>'
-    != '<script src="http://c.weihub.com/js/respond.min.js"></script>'
+    != '<script src="http://weihub.com/js/html5shiv.js"></script>'
+    != '<script src="http://weihub.com/js/respond.min.js"></script>'
     != '<![endif]-->'
   body
     .wrapper
@@ -25,7 +25,7 @@ html
               span.icon-bar
               span.icon-bar
               span.icon-bar
-            a.navbar-brand(href='/') WeiHub
+            a.navbar-brand(href='/') Wang Shenwei
           .navbar-collapse.collapse(role='navigation')
             ul.nav.navbar-nav
               li(class=nav === 'article' ? 'active' : '')
@@ -59,19 +59,18 @@ html
       .container
         footer
           .pull-left
-            | &copy; WeiHub
-            small.text-code.hidden-xs  [ˈweɪ·hʌb]
+            | &copy; Wang Shenwei
             a(href='http://weibo.com/wangshenwei') 微博
             a(href='https://github.com/weareoutman') GitHub
             a(href='http://instagram.com/weareoutman') Instagram
           .pull-right.hidden-xs
-            a(href='http://www.miibeian.gov.cn/', target='_blank') 粤ICP备12079626号
-    script(src='http://c.weihub.com/js/require.js')
+            a(href='http://www.miibeian.gov.cn/', target='_blank') 粤ICP备12079626号-2
+    script(src='http://weihub.com/js/require.js')
     script
       include ../public/js/config.js
     script.
       require.config({
-        baseUrl: 'http://c.weihub.com/js/',
+        baseUrl: 'http://weihub.com/js/',
         urlArgs: 'bust=main.1053b',
         paths: {
           main: 'main-built'
@@ -85,7 +84,7 @@ html
         (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
         m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
         })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-        ga('create', 'UA-48261249-1', 'weihub.com');
+        ga('create', 'UA-48261249-2', 'wangshenwei.com');
         ga('send', 'pageview');
     if scripts
       each script,i in scripts

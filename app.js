@@ -101,7 +101,7 @@ staticServer.use(express.compress());
 // @font-face access control
 staticServer.use(function(req, res, next){
   if (req.headers.origin) {
-    res.header('Access-Control-Allow-Origin', 'http://weihub.com');
+    res.header('Access-Control-Allow-Origin', 'http://wangshenwei.com');
     if (req.method === 'OPTIONS') {
       res.header('Access-Control-Allow-Methods', 'GET');
       res.header('Access-Control-Allow-Headers', 'Content-Type');
@@ -117,13 +117,13 @@ staticServer.use(express.static(__dirname + '/public', {
 
 var wwwServer = express();
 wwwServer.all('*', function(req, res){
-  res.redirect(301, 'http://weihub.com' + req.originalUrl);
+  res.redirect(301, 'http://wangshenwei.com' + req.originalUrl);
 });
 
 app.enable('trust proxy');
-app.use(express.vhost('weihub.com', main));
-app.use(express.vhost('c.weihub.com', staticServer));
-app.use(express.vhost('www.weihub.com', wwwServer));
+app.use(express.vhost('wangshenwei.com', main));
+app.use(express.vhost('weihub.com', staticServer));
+app.use(express.vhost('www.wangshenwei.com', wwwServer));
 
 app.listen(conf.port, conf.host);
 console.log('[%s] Express started listen on %s:%s, in %s mode',

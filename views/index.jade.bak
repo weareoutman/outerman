@@ -1,8 +1,8 @@
 extends ./layout.jade
 
 block vars
-  - var title = 'WeiHub'
-  - var scripts = ['http://c.weihub.com/js/index.js']
+  - var title = 'Wang Shenwei'
+  - var scripts = ['http://weihub.com/js/index.js']
 
 block content
   style.

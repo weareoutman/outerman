@@ -236,8 +236,8 @@ require(['d3'], function(d3) {
 
   var img = new Image();
   img.onload = ready;
-  // img.src = 'http://c.weihub.com/images/canvas.png';
-  img.src = 'http://c.weihub.com/images/puzzle.png';
+  // img.src = 'http://weihub.com/images/canvas.png';
+  img.src = 'http://weihub.com/images/puzzle.png';
 
   function ready() {
     var data = [];
