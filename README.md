@@ -5,7 +5,6 @@
 * Home page
 * Multi-page requirejs: https://github.com/requirejs/example-multipage
 * Backbone mvc and single-page
-* Comments
 * Article drafts
 * Article version control with git
 * Browserify
@@ -21,3 +20,4 @@
 * Error pages
 * Promise by Bluebird
 * RequireJS
+* Comments

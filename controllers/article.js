@@ -39,10 +39,6 @@ exports.use = function(app) {
 
   // Comment list
   app.get('/article/:uri/comment', get, listComments, function(req, res){
-    res.locals.commentList.forEach(function(comment){
-      var date = new Date(+ comment.create_time);
-      comment.str_create_time = date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate();
-    });
     res.send(res.locals.commentList);
   });
 
@@ -56,10 +52,6 @@ exports.use = function(app) {
 function list(req, res, next) {
   ArticleModel.list()
   .then(function(list){
-    list.forEach(function(article){
-      var date = new Date(+ article.create_time);
-      article.str_create_time = date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate();
-    });
     res.locals.list = list;
     next();
   }).catch(next);
@@ -68,8 +60,6 @@ function list(req, res, next) {
 function get(req, res, next) {
   ArticleModel.get(req.params.uri)
   .then(function(article){
-    var date = new Date(+ article.create_time);
-    article.str_create_time = date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate();
     res.locals.article = article;
     next();
   }).catch(next);

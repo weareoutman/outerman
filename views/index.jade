@@ -7,14 +7,30 @@ block content
   .container
     .jumbotron
       h1 你好，世界
-      p
-        code.label.label-primary(title='javascript') alert('Hello, world');
-      p
-        code.label.label-success(title='php') echo 'Hello, world';
-      p
-        code.label.label-info(title='html') &lt;p&gt; Hello, world &lt;/p&gt;
-      p
-        code.label.label-warning(title='css') .hello-world { color: #f93; }
+      p.sr-only 我是 Wang Shenwei
+      p 分享web前沿技术，探索前端最佳实践
+    .row
+      .col-md-12
+        if articleList.length > 0
+            ul.media-list.article-list
+              each article in articleList
+                li.media
+                  .pull-left.media-profile
+                    span.glyphicon.glyphicon-link.text-muted
+                  .media-body
+                    h4.media-heading
+                      a.article-title(href='/article/'+article.uri)= article.title
+                      |  
+                      small.article-meta.text-muted
+                        = article.str_create_time
+                        - var tags = article.tags && article.tags.split(',')
+                        if tags
+                          | ,
+                          each tag in tags
+                            |  
+                            a.text-muted= '#' + tag
+                    div= article.summary
+                      |  ...
   #running-car
     script.
       (function(){

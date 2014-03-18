@@ -19,13 +19,12 @@
     "connect-redis": "~1.4.6",
     "marked": "~0.3.1",
     "highlight.js": "~8.0.0",
-    "q": "^1.0.0",
-    "bluebird": "^1.0.7"
+    "bluebird": "^1.0.7",
+    "dateformat": "^1.0.7-1.2.3"
   },
   "devDependencies": {
     "requirejs": "~2.1.10",
     "gulp": "^3.5.2",
-    "through2": "^0.4.1",
-    "gulp-replace": "^0.2.0"
+    "through2": "^0.4.1"
   }
 }

@@ -100,7 +100,7 @@ require(['main'], function(){
             // alert('success');
           },
           error: function(col, res){
-            alert(res.statusText || 'Unknow Error');
+            // alert(res.statusText || 'Unknow Error');
           },
           complete: function(){
             $('#comment-loading').hide();

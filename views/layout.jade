@@ -6,7 +6,7 @@ html
     title= title
     meta(http-equiv='X-UA-Compatible', content='IE=edge')
     meta(name='viewport', content='width=device-width, initial-scale=1.0')
-    link(rel='stylesheet', href='http://weihub.com/css/style-built.css?bust=style.2f1b9')
+    link(rel='stylesheet', href='http://weihub.com/css/style-built.css?bust=style.4a146')
     if styles
       each style in styles
         link(rel='stylesheet', href='http://weihub.com/css/'+style)
@@ -54,14 +54,20 @@ html
       block content
     .footer
       .container
-        footer
-          .pull-left
-            | &copy; Wang Shenwei &nbsp; 
-            span.text-muted 联系我:
+        .row
+          .col-md-4.col-sm-6
+            | &copy; Wang Shenwei &nbsp;
             a(href='http://weibo.com/wangshenwei') 微博
+            |  
             a(href='https://github.com/weareoutman') GitHub
+            |  
             a(href='http://instagram.com/weareoutman') Instagram
-          .pull-right.hidden-xs
+          .col-md-4.hidden-sm.hidden-xs.text-center
+            | Powered by 
+            a(href='http://expressjs.com/') Express
+            | , 
+            a(href='http://redis.io/') Redis
+          .col-md-4.col-sm-6.hidden-xs.text-right
             a(href='http://www.miibeian.gov.cn/', target='_blank') 粤ICP备12079626号-2
     script(src='http://weihub.com/js/require.js')
     script

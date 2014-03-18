@@ -30,6 +30,7 @@ var Promise = require('bluebird')
   , _ = require('underscore')
   , marked = require('marked')
   , crypto = require('crypto')
+  , dateformat = require('dateformat')
   , db = require('../lib/db')
   , ClientError = require('../lib/errors').ClientError
   , ArticleModel = require('./article')
@@ -104,6 +105,7 @@ exports.list = function(articleId){
             fullname: comment.guest_name
           };
         }
+        format(comment);
       });
       return commentList;
     });
@@ -210,7 +212,7 @@ exports.post = function(articleId, body, user, ip) {
         fullname: comment.guest_name
       };
     }
-    return comment;
+    return format(comment);
   });
 };
 
@@ -223,4 +225,10 @@ function sha1(data) {
 // markdown to html, do sanitize
 function process(data) {
   return markedAsync(data.content, { sanitize: true });
+}
+
+function format(comment) {
+  var date = new Date(+ comment.create_time);
+  comment.str_create_time = dateformat(date, 'yyyy/m/d');
+  return comment;
 }

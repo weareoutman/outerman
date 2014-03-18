@@ -23,6 +23,7 @@ var Promise = require('bluebird')
   , _ = require('underscore')
   , marked = require('marked')
   , hljs = require('highlight.js')
+  , dateformat = require('dateformat')
   , db = require('../lib/db')
   , ClientError = require('../lib/errors').ClientError
   , markedAsync = Promise.promisify(marked)
@@ -54,6 +55,9 @@ function list() {
       multi.hgetall(KEYS.id2article(id));
     });
     return Promise.promisify(multi.exec, multi)();
+  }).then(function(list){
+    list.forEach(format);
+    return list;
   });
 }
 
@@ -65,7 +69,7 @@ function get(uri) {
       throw new ClientError(404);
     }
     return db.hgetallAsync(KEYS.id2article(id));
-  });
+  }).then(format);
 }
 
 // post an article
@@ -103,7 +107,7 @@ function post(body, user) {
   }).then(function(){
     // get article from db
     return db.hgetallAsync(KEYS.id2article(data.id));
-  });
+  }).then(format);
 }
 
 // update an article
@@ -145,7 +149,7 @@ function put(old, body, user) {
   }).then(function(){
     // get article from db
     return db.hgetallAsync(KEYS.id2article(id));
-  });
+  }).then(format);
 }
 
 // redefine marked renderer
@@ -206,6 +210,12 @@ function process(data) {
       data.summary = cleaned.substr(0, index);
     }
   });
+}
+
+function format(article) {
+  var date = new Date(+ article.create_time);
+  article.str_create_time = dateformat(date, 'yyyy/m/d');
+  return article;
 }
 
 var ArticleModel = {

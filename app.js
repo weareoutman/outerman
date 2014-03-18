@@ -4,6 +4,7 @@ var express = require('express')
   , AuthController = require('./controllers/auth')
   , UserController = require('./controllers/user')
   , ArticleController = require('./controllers/article')
+  , ArticleModel = require('./models/article')
   , db = require('./lib/db')
   , errors = require('./lib/errors')
   , ClientError = errors.ClientError
@@ -57,8 +58,12 @@ main.use(UserController.auth);
 main.set('views', __dirname + '/views');
 main.set('view engine', 'jade');
 
-main.get('/', function(req, res){
-  res.render('index');
+main.get('/', function(req, res, next){
+  ArticleModel.list()
+  .then(function(list){
+    res.locals.articleList = list;
+    res.render('index');
+  }).catch(next);
 });
 
 main.get('/robots.txt', function(req, res){
