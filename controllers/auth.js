@@ -11,7 +11,8 @@ var util = require('util')
     weibo: 'https://api.weibo.com/oauth2/authorize?client_id=%s&response_type=code&redirect_uri=%s&state=%s',
     qq: 'https://graph.qq.com/oauth2.0/authorize?client_id=%s&response_type=code&redirect_uri=%s&state=%s',
     github: 'https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s&state=%s',
-    instagram: 'https://api.instagram.com/oauth/authorize/?client_id=%s&response_type=code&redirect_uri=%s&state=%s'
+    instagram: 'https://api.instagram.com/oauth/authorize/?client_id=%s&response_type=code&redirect_uri=%s&state=%s',
+    google: 'https://accounts.google.com/o/oauth2/auth?response_type=code&client_id=%s&redirect_uri=%s&state=%s&&access_type=offline&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile'
   };
 
 function before(req, res, next){
