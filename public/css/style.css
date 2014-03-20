@@ -154,24 +154,24 @@ textarea.text-code {
 .btn-auth-instagram {
   background-image: url(../images/instagram.png);
 }
+.btn-auth-google {
+  background-image: url(../images/google.png);
+}
 @media (-webkit-min-device-pixel-ratio: 2),(min-resolution: 2dppx) {
   .btn-auth-weibo {
     background-image: url(../images/weibo@2x.png);
   }
-}
-@media (-webkit-min-device-pixel-ratio: 2),(min-resolution: 2dppx) {
   .btn-auth-qq {
     background-image: url(../images/qq@2x.png);
   }
-}
-@media (-webkit-min-device-pixel-ratio: 2),(min-resolution: 2dppx) {
   .btn-auth-github {
     background-image: url(../images/github@2x.png);
   }
-}
-@media (-webkit-min-device-pixel-ratio: 2),(min-resolution: 2dppx) {
   .btn-auth-instagram {
     background-image: url(../images/instagram@2x.png);
+  }
+  .btn-auth-google {
+    background-image: url(../images/google@2x.png);
   }
 }
 .media-profile {
@@ -196,7 +196,7 @@ textarea.text-code {
   position: absolute;
 }
 .comment-btns .col-name {
-  margin: 0 70px 0 235px;
+  margin: 0 70px 0 230px;
 }
 .comment-btns .col-submit {
   position: absolute;
