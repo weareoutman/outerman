@@ -20,10 +20,11 @@ block content
                 |  
                 a.text-muted= '#' + tag
             if user && user.admin
-              | &nbsp;
-              a.btn.btn-xs.btn-default(href='/article/' + article.uri + '/edit')
-                span.glyphicon.glyphicon-edit
-                |  编辑
+              |  &nbsp;[
+              a(href='/article/' + article.uri + '/edit') edit
+              | ] &nbsp;[
+              a(href='/article/' + article.uri + '/raw') raw
+              | ]
           .article-content!= article.html
         hr
         #comments.comment-container

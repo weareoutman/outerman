@@ -45,11 +45,13 @@ exports.use = function(app) {
   // Do post a comment
   app.post('/article/:uri/comment', /*UserController.restrict,*/ get, postComment, function(req, res){
     // res.send(res.locals.comment);
+    res.charset = 'utf-8';
     res.send(res.locals.comment);
   });
 
   // Article raw markdown content
   app.get('/article/:uri/raw', get, function(req, res){
+    res.charset = 'utf-8';
     res.type('txt').send(res.locals.article.content);
   });
 };
