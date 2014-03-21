@@ -27,10 +27,14 @@ block content
           .article-content!= article.html
         hr
         #comments.comment-container
-          div
-            strong 评论 
-            span#comment-loading.text-muted (加载中)
-            span#comment-badge.badge.hidden 6
+          .clearfix
+            .pull-left
+              strong 评论 
+              span#comment-loading.text-muted (加载中)
+              span#comment-badge.badge.hidden 6
+            .pull-right.text-muted 评论支持 
+              a(href='https://help.github.com/articles/github-flavored-markdown', target='_blank') GitHub Flavored Markdown
+              |  语法
           hr
           .media(style='margin-bottom:15px')
             .pull-left.media-profile
@@ -58,7 +62,7 @@ block content
                       a.btn-auth.btn-auth-google(href='/auth/redirect/google?path=' + path, title='Google')
                         span.sr-only Google
                   .col-name
-                    p.text-muted 或者输入一个名字：
+                    p.text-muted 不想登录？在这输入一个昵称：
                     div
                       input#comment-user.form-control
                 .col-submit

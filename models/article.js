@@ -176,6 +176,23 @@ renderer.code = function(code, lang, escaped) {
     + (escaped ? code : escape(code, true))
     + '\n</code></pre>\n';
 };
+renderer.table = function(header, body) {
+  return '<table class="table table-bordered table-striped">\n'
+    + '<thead>\n'
+    + header
+    + '</thead>\n'
+    + '<tbody>\n'
+    + body
+    + '</tbody>\n'
+    + '</table>\n';
+};
+renderer.tablecell = function(content, flags) {
+  var type = flags.header ? 'th' : 'td';
+  var tag = flags.align
+    ? '<' + type + ' class="text-' + flags.align + '">'
+    : '<' + type + '>';
+  return tag + content + '</' + type + '>\n';
+};
 
 // use highlight.js
 var markedOptions = {

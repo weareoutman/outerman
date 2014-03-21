@@ -47,6 +47,11 @@ exports.use = function(app) {
     // res.send(res.locals.comment);
     res.send(res.locals.comment);
   });
+
+  // Article raw markdown content
+  app.get('/article/:uri/raw', get, function(req, res){
+    res.type('txt').send(res.locals.article.content);
+  });
 };
 
 function list(req, res, next) {
