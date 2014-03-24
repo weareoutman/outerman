@@ -121,5 +121,19 @@ require(['main'], function(){
       }
     });
     var app = new AppView();
+
+    $('#btn-delete').click(function(){
+      if (confirm('确认删除这篇文章吗？')) {
+        $.ajax({
+          url: location.pathname,
+          type: 'DELETE',
+          dataType: 'json'
+        }).done(function(d){
+          location.href = '/article';
+        }).fail(function(xhr, status){
+          alert(status);
+        });
+      }
+    });
   });
 });

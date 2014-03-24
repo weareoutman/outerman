@@ -15,8 +15,14 @@ HMSET article:id:[id] {
 }
 SET article:uri:[uri] [id]
 LPUSH article:list [id]
-ZADD article:update_time [update_time] [id]
+# ZADD article:update_time [update_time] [id]
 SADD article:tag:[tag] [id]
+
+LREM article:list 0 [id]
+RENAMENX article:id:[id] trash:article:id:[id]
+RENAMENX article:uri:[uri] trash:article:uri:[uri]
+LPUSH trash:article:list [id]
+SREM article:tag:[tag] [id]
 */
 
 var Promise = require('bluebird')
@@ -40,6 +46,15 @@ var Promise = require('bluebird')
     },
     tag2id: function(tag) {
       return 'article:tag:' + encodeURIComponent(tag);
+    }
+  }
+  , TRASH = {
+    LIST: 'trash:article:list',
+    id2article: function(id) {
+      return 'trash:article:id:' + id;
+    },
+    uri2id: function(uri) {
+      return 'trash:article:uri:' + uri;
     }
   };
 
@@ -97,7 +112,7 @@ function post(body, user) {
     multi.hmset(KEYS.id2article(id), data);
     multi.set(KEYS.uri2id(data.uri), id);
     multi.lpush(KEYS.LIST, id);
-    multi.zadd(KEYS.UPDATE_TIME, data.update_time, id);
+    // multi.zadd(KEYS.UPDATE_TIME, data.update_time, id);
     if (tags && tags.length > 0) {
       tags.forEach(function(tag, i){
         multi.sadd(KEYS.tag2id(tag), id);
@@ -132,10 +147,10 @@ function put(old, body, user) {
       multi.renamenx(keyOldUri2id, keyNewUri2id);
     }
     multi.hmset(KEYS.id2article(id), data);
-    multi.zadd(KEYS.UPDATE_TIME, data.update_time, id);
+    // multi.zadd(KEYS.UPDATE_TIME, data.update_time, id);
     if (oldTags && oldTags.length > 0) {
       // remove old tags
-      oldTags.forEach(function(tag, i){
+      oldTags.forEach(function(tag){
         multi.srem(KEYS.tag2id(tag), id);
       });
     }
@@ -150,6 +165,23 @@ function put(old, body, user) {
     // get article from db
     return db.hgetallAsync(KEYS.id2article(id));
   }).then(format);
+}
+
+function remove(old, user) {
+  var multi = db.multi()
+    , id = old.id
+    , uri = old.uri
+    , tags = old.tags && old.tags.split(',');
+  multi.lpush(TRASH.LIST, id);
+  multi.renamenx(KEYS.uri2id(uri), TRASH.uri2id(uri));
+  multi.renamenx(KEYS.id2article(id), TRASH.id2article(id));
+  multi.lrem(KEYS.LIST, 0, id);
+  if (tags && tags.length > 0) {
+    tags.forEach(function(tag){
+      multi.srem(KEYS.tag2id(tag), id);
+    });
+  }
+  return Promise.promisify(multi.exec, multi)();
 }
 
 // redefine marked renderer
@@ -239,7 +271,8 @@ var ArticleModel = {
   list: list,
   get: get,
   post: post,
-  put: put
+  put: put,
+  remove: remove
 };
 
 module.exports = ArticleModel;

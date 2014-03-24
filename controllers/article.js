@@ -37,6 +37,11 @@ exports.use = function(app) {
     res.redirect('/article/' + res.locals.article.uri);
   });
 
+  // Do delete an article
+  app.delete('/article/:uri', UserController.restrict, get, remove, function(req, res){
+    res.send({});
+  });
+
   // Comment list
   app.get('/article/:uri/comment', get, listComments, function(req, res){
     res.send(res.locals.commentList);
@@ -84,6 +89,14 @@ function put(req, res, next) {
   ArticleModel.put(res.locals.article, req.body, res.locals.user)
   .then(function(article){
     res.locals.article = article;
+    next();
+  }).catch(next);
+}
+
+function remove(req, res, next) {
+  ArticleModel.remove(res.locals.article, res.locals.user)
+  .then(function(replies){
+    console.log(replies);
     next();
   }).catch(next);
 }

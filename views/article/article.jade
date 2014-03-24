@@ -21,9 +21,11 @@ block content
                 a.text-muted= '#' + tag
             if user && user.admin
               |  &nbsp;[
-              a(href='/article/' + article.uri + '/edit') edit
+              a(href='/article/' + article.uri + '/edit') Edit
               | ] &nbsp;[
-              a(href='/article/' + article.uri + '/raw') raw
+              a(href='/article/' + article.uri + '/raw') Raw
+              | ] &nbsp;[
+              a#btn-delete.text-danger(href='javascript:;') Delete
               | ]
           .article-content!= article.html
         hr
