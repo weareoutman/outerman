@@ -17,13 +17,18 @@ SET article:uri:[uri] [id]
 LPUSH article:list [id]
 # ZADD article:update_time [update_time] [id]
 SADD article:tag:[tag] [id]
-
-LREM article:list 0 [id]
-RENAMENX article:id:[id] trash:article:id:[id]
-RENAMENX article:uri:[uri] trash:article:uri:[uri]
-LPUSH trash:article:list [id]
-SREM article:tag:[tag] [id]
 */
+
+var ArticleModel = {
+  list: list,
+  get: get,
+  getById: getById,
+  post: post,
+  put: put,
+  remove: remove
+};
+
+module.exports = ArticleModel;
 
 var Promise = require('bluebird')
   , _ = require('underscore')
@@ -32,6 +37,7 @@ var Promise = require('bluebird')
   , dateformat = require('dateformat')
   , db = require('../lib/db')
   , ClientError = require('../lib/errors').ClientError
+  , CommentModel = require('./comment')
   , markedAsync = Promise.promisify(marked)
   , MAX_SUMMARY_LENGTH = 180
   , KEYS = {
@@ -76,15 +82,21 @@ function list() {
   });
 }
 
-// get an article
+// get an article by uri
 function get(uri) {
   return db.getAsync(KEYS.uri2id(uri))
   .then(function(id){
     if (! id) {
       throw new ClientError(404);
     }
-    return db.hgetallAsync(KEYS.id2article(id));
-  }).then(format);
+    return getById(id);
+  });
+}
+
+// get an article by id
+function getById(id) {
+  return db.hgetallAsync(KEYS.id2article(id))
+  .then(format);
 }
 
 // post an article
@@ -167,21 +179,36 @@ function put(old, body, user) {
   }).then(format);
 }
 
-function remove(old, user) {
+/*
+remove an article
+
+LREM article:list 0 [id]
+LPUSH trash:article:list [id]
+RENAMENX article:id:[id] trash:article:id:[id]
+RENAMENX article:uri:[uri] trash:article:uri:[uri]
+SREM article:tag:[tag] [id]
+*/
+function remove(article, user) {
   var multi = db.multi()
-    , id = old.id
-    , uri = old.uri
-    , tags = old.tags && old.tags.split(',');
-  multi.lpush(TRASH.LIST, id);
-  multi.renamenx(KEYS.uri2id(uri), TRASH.uri2id(uri));
-  multi.renamenx(KEYS.id2article(id), TRASH.id2article(id));
+    , id = article.id
+    , uri = article.uri
+    , tags = article.tags && article.tags.split(',');
   multi.lrem(KEYS.LIST, 0, id);
+  multi.lpush(TRASH.LIST, id);
+  multi.renamenx(KEYS.id2article(id), TRASH.id2article(id));
+  multi.renamenx(KEYS.uri2id(uri), TRASH.uri2id(uri));
   if (tags && tags.length > 0) {
     tags.forEach(function(tag){
       multi.srem(KEYS.tag2id(tag), id);
     });
   }
-  return Promise.promisify(multi.exec, multi)();
+  return Promise.promisify(multi.exec, multi)()
+  .then(function(){
+    return CommentModel.list(id);
+  }).map(function(comment){
+    // remove the comments of the article
+    return CommentModel.remove(comment, user);
+  });
 }
 
 // redefine marked renderer
@@ -225,6 +252,15 @@ renderer.tablecell = function(content, flags) {
     : '<' + type + '>';
   return tag + content + '</' + type + '>\n';
 };
+renderer.heading = function(text, level, raw) {
+  return '<h'
+    + level
+    + '>'
+    + text
+    + '</h'
+    + level
+    + '>\n';
+};
 
 // use highlight.js
 var markedOptions = {
@@ -266,13 +302,3 @@ function format(article) {
   article.str_create_time = dateformat(date, 'yyyy/m/d');
   return article;
 }
-
-var ArticleModel = {
-  list: list,
-  get: get,
-  post: post,
-  put: put,
-  remove: remove
-};
-
-module.exports = ArticleModel;

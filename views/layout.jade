@@ -6,7 +6,7 @@ html
     title= title
     meta(http-equiv='X-UA-Compatible', content='IE=edge')
     meta(name='viewport', content='width=device-width, initial-scale=1.0')
-    link(rel='stylesheet', href='http://weihub.com/css/style-built.css?bust=style.3a60f')
+    link(rel='stylesheet', href='http://weihub.com/css/style-built.css?bust=style.c49bb')
     if styles
       each style in styles
         link(rel='stylesheet', href='http://weihub.com/css/'+style)
@@ -25,13 +25,18 @@ html
               span.icon-bar
               span.icon-bar
               span.icon-bar
-            a.navbar-brand(href='/') Wang Shenwei
+            a.navbar-brand(href='/') WangShenwei
           .navbar-collapse.collapse(role='navigation')
             ul.nav.navbar-nav
               li(class=nav === 'article' ? 'active' : '')
                 a(href='/article')
                   span.glyphicon.glyphicon-list-alt
                   |  文章
+              if user && user.admin
+                li(class=nav === 'comments' ? 'active' : '')
+                  a(href='/comments')
+                    span.glyphicon.glyphicon-comment
+                    |  评论
             //- form.navbar-form.navbar-left(action='http://www.google.com.hk/search', method='get', role='search')
             //-   .form-group
             //-     input.form-control(type='search', name='q', autocapitalize='off', autocomplete='off', spellcheck='false', placeholder='搜索')

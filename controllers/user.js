@@ -1,7 +1,6 @@
 // Controller User
 
-var Promise = require('bluebird')
-  , UserModel = require('../models/user')
+var UserModel = require('../models/user')
   , ClientError = require('../lib/errors').ClientError;
 
 // Check the user has signed in.
@@ -46,7 +45,6 @@ exports.authed = function(req, res, next){
       res.cookie('uid', '' + user.id, { maxAge: month });
       res.cookie('usign', pswd, { maxAge: month });
       res.cookie('usalt', salt, { maxAge: month });
-      return;
     });
   }).then(function(){
     next();

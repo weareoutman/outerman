@@ -1,0 +1,70 @@
+extends ../layout.jade
+
+block vars
+  - var title = '评论列表 - Wang Shenwei'
+  - var nav = 'comments'
+
+block content
+  .container
+    .row
+      .col-md-12
+        table#comments.table.table-striped.table-bordered.table-hover
+          thead
+            tr
+              th 序号
+              th 文章
+              th 用户名
+              th 评论内容
+              th 时间
+              th 操作
+          tbody
+            each comment in commentList
+              tr
+                td= comment.id
+                td
+                  a(href='/article/' + comment.article.uri)= comment.article.title
+                td= comment.user.fullname
+                td= comment.content
+                td= comment.str_create_time
+                td
+                  a(href='javascript:;', data-action='delete', data-id=comment.id, data-uri=comment.article.uri)
+                    span.glyphicon.glyphicon-trash.text-danger
+        //- .comment-container
+        //-   ul#comments.media-list.comment-list
+        //-     each comment in commentList
+        //-       li.media
+        //-         a.pull-left.media-profile
+        //-           span.glyphicon.glyphicon-user.text-muted
+        //-         .media-body
+        //-           .media-heading.text-muted
+        //-             a=comment.user.fullname || 'unknown'
+        //-             |  
+        //-             = comment.str_create_time
+        //-             |  [
+        //-             a.text-danger(href='javascript:;', data-action='delete', data-id=comment.id, data-uri=comment.article.uri) Delete
+        //-             | ]
+        //-           div!= comment.html
+
+block inlineScript
+  script.
+    require(['main'], function(){
+      require(['jquery'], function($){
+        var btns = $('#comments').find('a[data-action=delete]');
+        btns.click(function(){
+          if (confirm('确认删除这条评论吗？')) {
+            var btn = $(this)
+              , id = btn.data('id')
+              , uri = btn.data('uri');
+            $.ajax({
+              url: '/article/' + uri + '/comment/' + id,
+              type: 'DELETE',
+              dataType: 'json'
+            }).done(function(d){
+              window.location.reload();
+            }).fail(function(xhr, status){
+              alert(status);
+            });
+          }
+        });
+      });
+    });

@@ -346,6 +346,9 @@ textarea.text-code {
   border-radius: 1000px;
   overflow: hidden;
 }
+a.media-profile:hover {
+  text-decoration: none;
+}
 .media-profile > .glyphicon {
   display: block;
   font-size: 40px;

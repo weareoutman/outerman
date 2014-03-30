@@ -52,8 +52,7 @@ require(['main'], function(){
         comments.create({
           content: content,
           html: content,
-          user: user,
-          str_create_time: '刚刚'
+          user: user
         }, {
           wait: true,
           success: function(){
@@ -125,11 +124,11 @@ require(['main'], function(){
     $('#btn-delete').click(function(){
       if (confirm('确认删除这篇文章吗？')) {
         $.ajax({
-          url: location.pathname,
+          url: window.location.pathname,
           type: 'DELETE',
           dataType: 'json'
         }).done(function(d){
-          location.href = '/article';
+          window.location.href = '/article';
         }).fail(function(xhr, status){
           alert(status);
         });
