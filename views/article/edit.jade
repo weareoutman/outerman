@@ -35,13 +35,11 @@ block content
 
 block inlineScript
   script.
-    require(['main'], function(){
-      require(['jquery'], function($){
-        var form = $('#form-article')
-          , draft = $('#input-draft');
-        $('#btn-draft').click(function(){
-          draft.val('1');
-          form.submit();
-        });
+    require(['jquery'], function($){
+      var form = $('#form-article')
+        , draft = $('#input-draft');
+      $('#btn-draft').click(function(){
+        draft.val('1');
+        form.submit();
       });
     });

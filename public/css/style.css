@@ -1,4 +1,5 @@
 @import url('bootstrap.min.css');
+@import url('nprogress.css');
 @import url('hljs-default.css');
 @import url('hljs-github.css');
 
@@ -80,6 +81,22 @@
   }
 }*/
 
+@media (max-width: 767px) {
+  #nprogress .spinner {
+    right: 70px;
+  }
+}
+@media (min-width: 768px) and (max-width: 829px) {
+  #nprogress .spinner {
+    right: auto;
+    left: 5px;
+  }
+}
+
+#nprogress .bar,
+#nprogress .spinner {
+  z-index: 2000;
+}
 @font-face {
   font-family: 'Audiowide';
   src: url('../fonts/Audiowide.eot');

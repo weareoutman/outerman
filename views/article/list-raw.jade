@@ -1,0 +1,34 @@
+.container
+  .row
+    .col-md-8.col-md-offset-2
+      if list.length > 0
+        ul.media-list.article-list
+          each article in list
+            li.media
+              .pull-left.media-profile
+                span.glyphicon.glyphicon-link.text-muted
+              .media-body
+                h4.media-heading
+                  a.article-title.hijax(href='/article/'+article.uri)= article.title
+                  |  
+                  small.article-meta.text-muted
+                    = article.str_create_time
+                    - var tags = article.tags && article.tags.split(',')
+                    if tags
+                      | ,
+                      each tag in tags
+                        |  
+                        a.text-muted= '#' + tag
+                  //- small.pull-right
+                  //-   a.text-muted(href='/article/'+article.uri+'#comments')
+                  //-     span.glyphicon.glyphicon-comment
+                  //-     |  (1)
+                div= article.summary
+                  |  ...
+      else
+        .well 还没有文章~
+      if user && user.admin
+        div(style='margin-top:20px')
+          a.btn.btn-sm.btn-default(href='/article/edit')
+            span.glyphicon.glyphicon-pencil
+            |  写文章

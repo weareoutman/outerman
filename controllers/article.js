@@ -1,13 +1,17 @@
 // Controller Article
 
-var ArticleModel = require('../models/article')
+var _ = require('underscore')
+  , conf = require('../config')
+  , ArticleModel = require('../models/article')
   , CommentModel = require('../models/comment')
   , UserController = require('./user');
 
 exports.use = function(app) {
   // Article list
   app.get('/article', list, function(req, res){
-    res.render('article/list');
+    res.locals.title = '文章列表' + conf.title_suffix;
+    res.locals.nav = 'article';
+    res.renderHijax('article/list');
   });
 
   // To post an article
@@ -17,7 +21,11 @@ exports.use = function(app) {
 
   // View an article
   app.get('/article/:uri', get, function(req, res){
-    res.render('article/article');
+    res.locals.title = res.locals.article.title + conf.title_suffix;
+    res.locals.nav = 'article';
+    res.locals.script = 'article';
+    res.locals.datum = _.pick(res.locals.article, 'uri');
+    res.renderHijax('article/article');
   });
 
   // To update an article
@@ -54,7 +62,10 @@ exports.use = function(app) {
 
   // Get all comments
   app.get('/comments', UserController.restrict, listAllComments, function(req, res){
-    res.render('article/comments');
+    res.locals.title = '评论列表' + conf.title_suffix;
+    res.locals.nav = 'comments';
+    res.locals.script = 'comments';
+    res.renderHijax('article/comments');
   });
 
   // Do delete a comment

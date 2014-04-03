@@ -1,4 +1,5 @@
 require.config({
+  baseUrl: 'http://weihub.com/js/',
   paths: {
     jquery: 'jquery-1.10.2'
   },

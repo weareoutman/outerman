@@ -1,6 +1,7 @@
 var express = require('express')
   , fs = require('fs')
   , Promise = require('bluebird')
+  , _ = require('underscore')
   , AuthController = require('./controllers/auth')
   , UserController = require('./controllers/user')
   , ArticleController = require('./controllers/article')
@@ -55,14 +56,36 @@ main.use(express.methodOverride());
 // user auth
 main.use(UserController.auth);
 
+// Hijax render
+main.use(function(req, res, next){
+  res.renderHijax = function(view){
+    if (req.query.hijax) {
+      res.render(view + '-raw', function(err, html){
+        if (err) {
+          throw err;
+        }
+        var data = _.pick(res.locals, ['title', 'nav', 'script', 'datum']);
+        data.html = html;
+        // data.originalUrl = req.originalUrl;
+        res.send(data);
+      });
+    } else {
+      res.render(view);
+    }
+  };
+  next();
+});
+
 main.set('views', __dirname + '/views');
 main.set('view engine', 'jade');
 
 main.get('/', function(req, res, next){
   ArticleModel.list()
   .then(function(list){
+    res.locals.title = 'Wang Shenwei';
+    res.locals.script = 'index';
     res.locals.articleList = list;
-    res.render('index');
+    res.renderHijax('index');
   }).catch(next);
 });
 
@@ -117,7 +140,7 @@ staticServer.use(function(req, res, next){
   next();
 });
 staticServer.use(express.static(__dirname + '/public', {
-  maxAge: 2.592e9 // 30天
+  maxAge: dev ? 0 : 2.592e9 // 30天
 }));
 
 var wwwServer = express();

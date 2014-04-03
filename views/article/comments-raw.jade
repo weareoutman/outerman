@@ -1,0 +1,24 @@
+.container
+  .row
+    .col-md-12
+      table#comments.table.table-striped.table-bordered.table-hover
+        thead
+          tr
+            th 序号
+            th 文章
+            th 用户名
+            th 评论内容
+            th 时间
+            th 操作
+        tbody
+          each comment in commentList
+            tr
+              td= comment.id
+              td
+                a(href='/article/' + comment.article.uri)= comment.article.title
+              td= comment.user.fullname
+              td= comment.content
+              td= comment.str_create_time
+              td
+                a(href='javascript:;', data-action='delete', data-id=comment.id, data-uri=comment.article.uri)
+                  span.glyphicon.glyphicon-trash.text-danger

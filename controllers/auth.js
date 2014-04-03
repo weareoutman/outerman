@@ -45,7 +45,9 @@ exports.use = function(app){
       path = '/';
     }
     res.locals.path = encodeURIComponent(path);
-    res.render('auth');
+    res.locals.title = '登录' + conf.title_suffix;
+    res.locals.nav = 'auth';
+    res.renderHijax('auth');
   });
 
   // Auth redirect

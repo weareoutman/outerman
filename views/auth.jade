@@ -1,20 +1,3 @@
-extends ./layout.jade
-
-block vars
-  - var title = '登录 - Wang Shenwei'
-  - var nav = 'auth'
-
+extends layout.jade
 block content
-  .container
-    p 使用社交账号登录：
-    p
-      //- a.btn-auth.btn-auth-weibo(href='/auth/redirect/weibo?path=' + path, title='微博')
-      //-   span.sr-only 微博
-      a.btn-auth.btn-auth-qq(href='/auth/redirect/qq?path=' + path, title='QQ')
-        span.sr-only QQ
-      a.btn-auth.btn-auth-github(href='/auth/redirect/github?path=' + path, title='GitHub')
-        span.sr-only GitHub
-      a.btn-auth.btn-auth-instagram(href='/auth/redirect/instagram?path=' + path, title='Instagram')
-        span.sr-only Instagram
-      a.btn-auth.btn-auth-google(href='/auth/redirect/google?path=' + path, title='Google')
-        span.sr-only Google
+  include auth-raw

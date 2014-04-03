@@ -6,7 +6,7 @@ html
     title= title
     meta(http-equiv='X-UA-Compatible', content='IE=edge')
     meta(name='viewport', content='width=device-width, initial-scale=1.0')
-    link(rel='stylesheet', href='http://weihub.com/css/style-built.css?bust=style.c49bb')
+    link(rel='stylesheet', href='http://weihub.com/css/style-built.css?bust=style.716c0')
     if styles
       each style in styles
         link(rel='stylesheet', href='http://weihub.com/css/'+style)
@@ -17,7 +17,7 @@ html
     != '<![endif]-->'
   body
     .wrapper
-      header.navbar.navbar-default.navbar-static-top(role='banner')
+      header#navbar.navbar.navbar-default.navbar-static-top(role='banner')
         .container
           .navbar-header
             button.navbar-toggle(type='button', data-toggle='collapse', data-target='.navbar-collapse')
@@ -25,16 +25,16 @@ html
               span.icon-bar
               span.icon-bar
               span.icon-bar
-            a.navbar-brand(href='/') WangShenwei
+            a.navbar-brand.hijax(href='/') WangShenwei
           .navbar-collapse.collapse(role='navigation')
             ul.nav.navbar-nav
-              li(class=nav === 'article' ? 'active' : '')
-                a(href='/article')
+              li(class=nav === 'article' ? 'active' : '', data-nav='article')
+                a.hijax(href='/article')
                   span.glyphicon.glyphicon-list-alt
                   |  文章
               if user && user.admin
-                li(class=nav === 'comments' ? 'active' : '')
-                  a(href='/comments')
+                li(class=nav === 'comments' ? 'active' : '', data-nav='comments')
+                  a.hijax(href='/comments')
                     span.glyphicon.glyphicon-comment
                     |  评论
             //- form.navbar-form.navbar-left(action='http://www.google.com.hk/search', method='get', role='search')
@@ -52,11 +52,12 @@ html
                     span.glyphicon.glyphicon-log-out
                     |  退出
               else 
-                li(class=nav === 'auth' ? 'active' : '')
-                  a#top-sign-in(href='/auth')
+                li(class=nav === 'auth' ? 'active' : '', data-nav='auth')
+                  a#top-sign-in.hijax(href='/auth')
                     span.glyphicon.glyphicon-log-in
                     |  登录
-      block content
+      #container
+        block content
     .footer
       .container
         .row
@@ -75,17 +76,17 @@ html
           .col-md-4.col-sm-6.hidden-xs.text-right
             a(href='http://www.miibeian.gov.cn/', target='_blank') 粤ICP备12079626号-2
     script(src='http://weihub.com/js/require.js')
+    script(src='http://weihub.com/js/main-built.js?bust=main.bfcb1')
     script
-      include ../public/js/config.js
-    script.
-      require.config({
-        baseUrl: 'http://weihub.com/js/',
-        urlArgs: 'bust=main.1053b',
-        paths: {
-          main: 'main-built'
-        }
-      });
-      require(['main']);
+      - var requires = ['main']
+      if script
+        - requires.push(script)
+      | require(
+      != JSON.stringify(requires)
+      | ,function(main,script){script&&(main.current=script.initialize(
+      if datum
+        != JSON.stringify(datum)
+      | ))});
     if !DEV
       script.
         // Google analytics
@@ -95,7 +96,8 @@ html
         })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
         ga('create', 'UA-48261249-2', 'wangshenwei.com');
         ga('send', 'pageview');
-    if scripts
-      each script,i in scripts
-        script(src=script)
+    //- if scripts
+    //-   each script,i in scripts
+    //-     script(src=script)
     block inlineScript
+

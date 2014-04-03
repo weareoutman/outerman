@@ -7,6 +7,8 @@ var UserModel = require('../models/user')
 // 1. Skip if a user session exists.
 // 2. Check cookies against db.
 exports.auth = function(req, res, next){
+  // Set res.locals as an object instead of app.locals as a function
+  res.locals = {};
   if (req.session.user) {
     res.locals.user = req.session.user;
     return next();
