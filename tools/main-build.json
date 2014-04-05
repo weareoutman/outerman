@@ -4,5 +4,9 @@
   "optimize": "uglify2",
   "preserveLicenseComments": false,
   "name": "main",
+  "related": [
+    "public/js/pagelet.js",
+    "public/js/index.js"
+  ],
   "out": "public/js/main-built.js"
 }

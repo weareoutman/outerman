@@ -25,6 +25,7 @@
   "devDependencies": {
     "requirejs": "~2.1.10",
     "gulp": "^3.5.2",
-    "through2": "^0.4.1"
+    "through2": "^0.4.1",
+    "gulp-replace": "^0.2.0"
   }
 }

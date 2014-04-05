@@ -1,8 +1,5 @@
 require.config({
   baseUrl: 'http://weihub.com/js/',
-  paths: {
-    jquery: 'jquery-1.10.2'
-  },
   shim: {
     'bootstrap': ['jquery'],
     backbone: {
@@ -14,24 +11,49 @@ require.config({
     }
   }
 });
+
 define(function(require, exports, module){
   var $ = require('jquery')
     , bs = require('bootstrap')
     , Backbone = require('backbone')
-    , NProgress = require('nprogress');
+    , NProgress = require('nprogress')
+    , Pagelet = require('pagelet')
+    , has = require('has')
+    , index = require('index');
 
-  window.console = window.console || {};
-  if (! window.console.log) {
-    window.console.log = function(){};
+  // Detect if the browser supports svg animation
+  has.add('dom-createelementns', function(g, d){
+    return has('dom') && has.isHostType(d, 'createElementNS');
+  });
+  has.add('svg-smil', function(g, d){
+    return has('dom-createelementns') &&
+        /SVG/.test(Object.prototype.toString.call(
+        d.createElementNS('http://www.w3.org/2000/svg', 'animate')));
+  });
+  // Detect if the browser supports console
+  has.add('console', function(g){
+    return has.isHostType(window, 'console') &&
+        has.isHostType(window.console, 'log');
+  });
+  if (! has('console')) {
+    window.console = {
+      log: function(){}
+    };
   }
 
-  var canPushState = !! history.pushState;
+  var main = {}, current;
+  module.exports = main;
+
+  main.log = function(){
+    window.console.log.apply(window.console, arguments);
+  };
 
   var origin = location.origin ||
       location.protocol + '//' + location.host;
 
+  // Set auth callback url
   function setAuthUrl() {
-    // TODO: test IE8
+    // TODO: test IE8 if enable hashChange
     var path = location.pathname
       , search = location.search;
     if (/^\/auth($|\/)/.test(location.pathname)) {
@@ -43,6 +65,7 @@ define(function(require, exports, module){
     $('#top-sign-out').attr('href', '/signout?path=' + path);
   }
 
+  // Set active nav bar
   var navbar = $('#navbar').find('li[data-nav]');
   function setNavbar(nav) {
     navbar.removeClass('active');
@@ -51,6 +74,7 @@ define(function(require, exports, module){
     }
   }
 
+  // Intercept links
   $(document).on('click', 'a.hijax', function(e){
     if (e.ctrlKey || e.metaKey) {
       return;
@@ -65,38 +89,33 @@ define(function(require, exports, module){
 
   var container = $('#container');
 
+  var popping = true;
   var Router = Backbone.Router.extend({
     routes: {
       '*path': 'any',
     },
     any: function(path){
       // TODO: test IE8
-      path = path || "";
-      var jump = _jump;
-      _jump = false;
-      hijax('/' + path + location.search, jump);
+      path = path || '';
+      hijax('/' + path + location.search);
     }
   });
 
-  var _jump, _state = {};
   var $win = $(window);
   function navigate(frag) {
-    _jump = true;
-    if (canPushState) {
-      history.replaceState({
-        x: $win.scrollLeft(),
-        y: $win.scrollTop()
-      }, document.title, location.toString());
-      console.log('replaceState', history.state.x, history.state.y);
-    }
-    app.navigate(frag, {trigger: true});
+    // main.log('navigate');
+    popping = false;
+    router.navigate(frag, {trigger: true});
   }
 
-  function hijax(path, jump) {
+  function hijax(path) {
+    // main.log('hijax', popping);
+    var popped = popping;
+    popping = true;
     NProgress.start();
-    if (exports.current) {
-      exports.current.destroy();
-      exports.current = null;
+    if (current) {
+      current.destroy();
+      current = null;
     }
     $.ajax({
       url: path,
@@ -105,68 +124,43 @@ define(function(require, exports, module){
       },
       dataType: 'json'
     }).done(function(d){
-      scrollTo(0, 0);
-      document.title = d.title;
-      container.html(d.html);
-      setNavbar(d.nav);
-      if (d.script) {
-        require([].concat(d.script), function(script){
-          exports.current = script.initialize(d.datum);
-          /*if (! jump) {
-            console.log(exports.current.pageXOffset || 0, exports.current.pageYOffset || 0);
-            scrollTo(exports.current.pageXOffset || 0, exports.current.pageYOffset || 0);
-          }*/
-        });
-      }
-      console.log('scrollTo', _x, _y);
-      scrollTo(_x, _y);
-      _x = _y = 0;
-      setAuthUrl();
+      render(d, path, popped);
     }).always(function(){
       NProgress.done();
+    }).fail(function(xhr, status, error){
+      // main.log('hijax failed', status, error, xhr.responseJSON);
+      if (xhr.responseJSON) {
+        render(xhr.responseJSON, path, popped);
+      }
     });
-    // TODO: fail
   }
 
-  /*var $win = $(window).scroll(function(){
-    if (exports.current) {
-      exports.current.pageXOffset = $win.scrollLeft();
-      exports.current.pageYOffset = $win.scrollTop();
+  function render(d, path, popped) {
+    document.title = d.title;
+    container.html(d.html);
+    setNavbar(d.nav);
+    setAuthUrl();
+    $('#navbar-collapse').removeClass('in');
+    if (d.script) {
+      require([].concat(d.script), function(pagelet){
+        current = pagelet.initialize(d.datum);
+      });
+    } else {
+      current = Pagelet.defaults(path);
     }
-  });*/
+    if (! popped) {
+      // Scroll to top if not from popstate
+      scrollTo(0, 0);
+    }
+  }
 
-  var app = new Router();
+  var router = new Router();
   Backbone.history.start({
     pushState: true,
+    hashChange: false,
     silent: true
   });
   setAuthUrl();
 
-  var _x = 0, _y = 0;
-  var _a = 0, _b = 0;
-  window.onpopstate = function(e){
-    if (e.state) {
-      console.log('on popstate', e.state, e.state === history.state);
-      if (! e.state.hasOwnProperty('x')) {
-        _x = _a;
-        _y = _b;
-      } else {
-        _x = e.state.x;
-        _y = e.state.y;
-        delete history.state.x;
-        delete history.state.y;
-        history.replaceState({}, document.title, location.toString());
-      }
-      _a = $win.scrollLeft();
-      _b = $win.scrollTop();
-      console.log('after popstate', history.state);
-    }
-  };
-
-  app.on('route', function(){
-    console.log('on route');
-  });
-
-  exports.navigate = navigate;
-  // exports.Pagelet = Pagelet;
+  main.navigate = navigate;
 });

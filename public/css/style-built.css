@@ -299,13 +299,14 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 }
 @media (max-width: 767px) {
   #nprogress .spinner {
+    position: absolute;
     right: 70px;
   }
 }
 @media (min-width: 768px) and (max-width: 829px) {
   #nprogress .spinner {
     right: auto;
-    left: 5px;
+    right: 3px;
   }
 }
 #nprogress .bar,
@@ -320,9 +321,6 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 .font-audiowid,
 .navbar-brand {
   font-family: 'Audiowide','Helvetica Neue',Helvetica,Arial,sans-serif;
-}
-html, body {
-  height: 100%;
 }
 blockquote,
 blockquote footer {
@@ -346,16 +344,22 @@ blockquote footer {
 textarea.text-code {
   word-break: break-all;
 }
-.wrapper {
-  min-height: 100%;
-  height: auto;
-  margin: 0 auto -40px;
-  padding: 0 0 60px;
-}
 .footer {
-  background-color: #f5f5f5;
-  height: 40px;
-  line-height: 40px;
+  border-top: 1px solid #e7e7e7;
+  color: #666;
+  line-height: 1.6;
+  margin-top: 30px;
+  padding-top: 18px;
+  padding-bottom: 18px;
+  text-align: center;
+}
+@media (min-width: 992px) {
+  .footer-left {
+    text-align: left;
+  }
+  .footer-right {
+    text-align: right;
+  }
 }
 .btn-auth {
   display: inline-block;
@@ -461,5 +465,11 @@ a.media-profile:hover {
   }
   .col-submit > .text-muted {
     display: none;
+  }
+  .col-submit .btn {
+    width: 100%;
+    display: block;
+    padding-left: 0;
+    padding-right: 0;
   }
 }

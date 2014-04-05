@@ -1,12 +1,16 @@
 define(function(require, exports, module){
-  exports.initialize = function(){
-    if (document.createElementNS && document.createElementNS('http://www.w3.org/2000/svg', 'svg').createSVGRect) {
-      var img = new Image();
-      img.src = 'http://weihub.com/images/run.svg';
-      img.setAttribute('width', '100%');
-      document.getElementById('running-car').appendChild(img);
+  var Pagelet = require('pagelet')
+    , _ = require('underscore')
+    , has = require('has');
+  module.exports = _.extend(new Pagelet(), {
+    initialize: function(){
+      if (has('svg-smil')) {
+        var img = new Image();
+        img.src = 'http://weihub.com/images/run.svg';
+        img.setAttribute('width', '100%');
+        document.getElementById('running-car').appendChild(img);
+      }
+      return this;
     }
-    return exports;
-  };
-  exports.destroy = function(){};
+  });
 });

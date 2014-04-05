@@ -64,7 +64,7 @@ main.use(function(req, res, next){
         if (err) {
           throw err;
         }
-        var data = _.pick(res.locals, ['title', 'nav', 'script', 'datum']);
+        var data = _.pick(res.locals, ['title', 'nav', 'script', 'datum', 'error']);
         data.html = html;
         // data.originalUrl = req.originalUrl;
         res.send(data);

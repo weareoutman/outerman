@@ -11,8 +11,9 @@ confList.forEach(function(name){
   confs[name] = require('./tools/' + name + '-build.json');
 });
 
+var scripts = ['article', 'comments'];
+
 _.each(confs, function(conf, name){
-  console.log(conf);
   gulp.task('rjs:' + name, function(){
     requirejs.optimize(conf, function(out){
       console.log('requirejs optimized: ', out);
@@ -25,13 +26,26 @@ _.each(confs, function(conf, name){
   });
 });
 
+scripts.forEach(function(name){
+  gulp.task('bust:' + name, function(){
+    gulp.src(['public/js/' + name + '.js']).pipe(bust(name));
+  });
+});
+
 gulp.task('watch', function(){
   _.each(confs, function(conf, name){
     var path = conf.cssIn;
     if (! path) {
       path = conf.baseUrl + '/' + name + '.js';
     }
-    gulp.watch([path], ['bust:' + name]);
+    var paths = [path];
+    if (conf.related) {
+      paths = paths.concat(conf.related);
+    }
+    gulp.watch(paths, ['bust:' + name]);
+  });
+  scripts.forEach(function(name){
+    gulp.watch(['public/js/' + name + '.js'], ['bust:' + name]);
   });
 });
 

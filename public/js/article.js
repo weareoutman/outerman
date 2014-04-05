@@ -2,7 +2,8 @@ define(function(require, exports, module){
   var $ = require('jquery')
     , _ = require('underscore')
     , Backbone = require('backbone')
-    , main = require('main');
+    , main = require('main')
+    , Pagelet = require('pagelet');
 
   var uri;
   var Comment = Backbone.Model.extend({
@@ -33,7 +34,8 @@ define(function(require, exports, module){
         var textParent = this.$text.parent();
         textParent.addClass('has-error has-feedback')
             .append('<span class="glyphicon glyphicon-warning-sign form-control-feedback" style="bottom:0"></span>');
-        this.$text.one('change input', function(){
+        this.$text.on('change input', function(){
+          that.$text.off('change input');
           textParent.removeClass('has-error has-feedback')
               .children('.form-control-feedback').remove();
         }).focus();
@@ -43,7 +45,8 @@ define(function(require, exports, module){
         var userParent = this.$user.parent();
         userParent.addClass('has-error has-feedback')
             .append('<span class="glyphicon glyphicon-warning-sign form-control-feedback" style="top:0"></span>');
-        this.$user.one('change input', function(){
+        this.$user.on('change input', function(){
+          that.$user.off('change input');
           userParent.removeClass('has-error has-feedback')
               .children('.form-control-feedback').remove();
         }).focus();
@@ -144,18 +147,19 @@ define(function(require, exports, module){
 
   var app, comments;
 
-  exports.initialize = function(datum){
-    uri = datum.uri;
-    comments = new CommentList();
-    app = new AppView();
-    btnDelete.click(doDeleteArticle);
-    return exports;
-  };
-
-  exports.destroy = function(){
-    app.stopListening();
-    comments.stopListening();
-    btnDelete.off('click');
-  };
+  module.exports = _.extend(new Pagelet(), {
+    initialize: function(datum){
+      uri = datum.uri;
+      comments = new CommentList();
+      app = new AppView();
+      btnDelete.click(doDeleteArticle);
+      return this;
+    },
+    destroy: function(){
+      app.stopListening();
+      comments.stopListening();
+      btnDelete.off('click');
+    }
+  });
 
 });

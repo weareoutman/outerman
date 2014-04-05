@@ -1,0 +1,10 @@
+.container
+  .alert.alert-warning
+    strong= title + '！'
+    = error.name + ' : ' + error.message
+    |  
+    a.btn.btn-xs.btn-link.hijax(href='/')
+      span.glyphicon.glyphicon-home
+      |  返回首页
+  if DEV
+    pre= error.stack
