@@ -75,12 +75,12 @@ html
         .col-md-4.footer-right
           a(href='http://www.miibeian.gov.cn/', target='_blank') 粤ICP备12079626号-2
     script(src='http://weihub.com/js/require.js')
-    script(src='http://weihub.com/js/main-built.js?bust=main.db082')
+    script(src='http://weihub.com/js/main-built.js?bust=main.3ef0b')
     script.
       require.config({
         paths: {
           // index: 'index.js?bust=index.5edb3',
-          article: 'article.js?bust=article.e03d0',
+          article: 'article.js?bust=article.46852',
           comments: 'comments.js?bust=comments.fb52d',
         }
       });
@@ -90,10 +90,10 @@ html
         - requires.push(script)
       | require(
       != JSON.stringify(requires)
-      | ,function(main,script){script&&(main.current=script.initialize(
+      | ,function(main,script){script&&(main.setCurrent(script.initialize(
       if datum
         != JSON.stringify(datum)
-      | ))});
+      | )))});
     if !DEV
       script.
         // Google analytics

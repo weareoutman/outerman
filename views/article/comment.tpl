@@ -8,7 +8,7 @@
 <div class="media-body">
   <div class="media-heading text-muted">
     <a<%- user.profile_url ? ' href="' + user.profile_url + '"' : '' %>><%- user.fullname || 'unknown' %></a>
-    <%= str_create_time %>
+    <span title="<%= str_create_time %>" data-minutes=<%= diff_minutes %>><%= str_from_now %></span>
   </div>
   <div><%= html %></div>
 </div>

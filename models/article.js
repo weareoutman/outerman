@@ -34,7 +34,7 @@ var Promise = require('bluebird')
   , _ = require('underscore')
   , marked = require('marked')
   , hljs = require('highlight.js')
-  , dateformat = require('dateformat')
+  , moment = require('moment')
   , db = require('../lib/db')
   , ClientError = require('../lib/errors').ClientError
   , CommentModel = require('./comment')
@@ -298,7 +298,6 @@ function process(data) {
 }
 
 function format(article) {
-  var date = new Date(+ article.create_time);
-  article.str_create_time = dateformat(date, 'yyyy/m/d');
+  article.str_create_time = moment(+ article.create_time).format('YYYY/M/D');
   return article;
 }

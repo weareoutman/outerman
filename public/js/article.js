@@ -107,6 +107,7 @@ define(function(require, exports, module){
       comments.fetch({
         success: function(){
           // alert('success');
+          that.updateMinutes();
         },
         error: function(col, res){
           // alert(res.statusText || 'Unknow Error');
@@ -126,10 +127,36 @@ define(function(require, exports, module){
     },
     addAll: function(){
       comments.each(this.addOne, this);
+    },
+    updateMinutes: function(){
+      var that = this;
+      this._updateMinutesTimer = setInterval(function(){
+        var spans = that.$list.find('span[data-minutes]');
+        spans.each(function(){
+          var span = $(this)
+            , minutes = + span.data('minutes') + 1;
+          if (minutes < 45) {
+            span.html(minutes + '分钟前');
+            span.data('minutes', minutes);
+          } else {
+            if (minutes < 90) {
+              span.html('1小时前');
+            }
+            span.removeAttr('data-minutes');
+            span.removeData('minutes');
+          }
+        });
+      }, 6e4);
+    },
+    stopUpdateMinutes: function(){
+      if (this._updateMinutesTimer) {
+        clearInterval(this._updateMinutesTimer);
+        delete this._updateMinutesTimer;
+      }
     }
   });
 
-  function doDeleteArticle() {
+  function toDeleteArticle() {
     if (confirm('确认删除这篇文章吗？')) {
       $.ajax({
         url: '/article/' + uri,
@@ -152,11 +179,12 @@ define(function(require, exports, module){
       uri = datum.uri;
       comments = new CommentList();
       app = new AppView();
-      btnDelete.click(doDeleteArticle);
+      btnDelete.click(toDeleteArticle);
       return this;
     },
     destroy: function(){
       app.stopListening();
+      app.stopUpdateMinutes();
       comments.stopListening();
       btnDelete.off('click');
     }

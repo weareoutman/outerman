@@ -48,6 +48,10 @@ define(function(require, exports, module){
     window.console.log.apply(window.console, arguments);
   };
 
+  main.setCurrent = function(pagelet){
+    current = pagelet;
+  };
+
   var origin = location.origin ||
       location.protocol + '//' + location.host;
 
@@ -103,13 +107,11 @@ define(function(require, exports, module){
 
   var $win = $(window);
   function navigate(frag) {
-    // main.log('navigate');
     popping = false;
     router.navigate(frag, {trigger: true});
   }
 
   function hijax(path) {
-    // main.log('hijax', popping);
     var popped = popping;
     popping = true;
     NProgress.start();
@@ -128,7 +130,6 @@ define(function(require, exports, module){
     }).always(function(){
       NProgress.done();
     }).fail(function(xhr, status, error){
-      // main.log('hijax failed', status, error, xhr.responseJSON);
       if (xhr.responseJSON) {
         render(xhr.responseJSON, path, popped);
       }

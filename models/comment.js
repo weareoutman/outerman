@@ -38,7 +38,7 @@ var Promise = require('bluebird')
   , _ = require('underscore')
   , marked = require('marked')
   , crypto = require('crypto')
-  , dateformat = require('dateformat')
+  , moment = require('moment')
   , db = require('../lib/db')
   , ClientError = require('../lib/errors').ClientError
   , ArticleModel = require('./article')
@@ -325,7 +325,9 @@ function process(data) {
 }
 
 function format(comment) {
-  var date = new Date(+ comment.create_time);
-  comment.str_create_time = dateformat(date, 'yyyy/m/d HH:MM');
+  var m = moment(+ comment.create_time);
+  comment.str_create_time = m.format('YYYY/M/D HH:mm');
+  comment.str_from_now = m.fromNow();
+  comment.diff_minutes = moment().diff(m, 'minutes');
   return comment;
 }

@@ -2,6 +2,7 @@ var express = require('express')
   , fs = require('fs')
   , Promise = require('bluebird')
   , _ = require('underscore')
+  , moment = require('moment')
   , AuthController = require('./controllers/auth')
   , UserController = require('./controllers/user')
   , ArticleController = require('./controllers/article')
@@ -33,6 +34,8 @@ main.use(express.logger({
   format: logFormat,
   stream: mainLog
 }));
+
+moment.lang('zh-cn');
 
 main.use(express.compress());
 
