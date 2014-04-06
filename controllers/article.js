@@ -14,9 +14,13 @@ exports.use = function(app) {
     res.renderHijax('article/list');
   });
 
-  // To post an article
+  // To write an article
   app.get('/article/edit', UserController.restrict, function(req, res){
-    res.render('article/edit');
+    res.locals.title = '写一篇文章' + conf.title_suffix;
+    res.locals.nav = 'article';
+    res.locals.datum = {};
+    res.locals.script = 'edit';
+    res.renderHijax('article/edit');
   });
 
   // View an article
@@ -30,17 +34,31 @@ exports.use = function(app) {
 
   // To update an article
   app.get('/article/:uri/edit', UserController.restrict, get, function(req, res){
-    res.locals.update = true;
-    res.render('article/edit');
+    var article = res.locals.article;
+    res.locals.title = '修改文章: ' + article.title + conf.title_suffix;
+    res.locals.nav = 'article';
+    res.locals.datum = {
+      id: article.id,
+      uri: article.uri,
+      update: true
+    };
+    res.locals.script = 'edit';
+    res.renderHijax('article/edit');
   });
 
   // Do post an article
   app.post('/article', UserController.restrict, post, function(req, res){
+    if (req.xhr) {
+      return res.send(res.locals.article);
+    }
     res.redirect('/article/' + res.locals.article.uri);
   });
 
   // Do update an article
   app.put('/article/:uri', UserController.restrict, get, put, function(req, res){
+    if (req.xhr) {
+      return res.send(res.locals.article);
+    }
     res.redirect('/article/' + res.locals.article.uri);
   });
 

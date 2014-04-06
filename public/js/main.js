@@ -1,5 +1,4 @@
 require.config({
-  baseUrl: 'http://weihub.com/js/',
   shim: {
     'bootstrap': ['jquery'],
     backbone: {
@@ -29,6 +28,14 @@ define(function(require, exports, module){
     return has('dom-createelementns') &&
         /SVG/.test(Object.prototype.toString.call(
         d.createElementNS('http://www.w3.org/2000/svg', 'animate')));
+  });
+  // Detect if the browser supports input event
+  has.add('oninput', function(g){
+    return 'oninput' in g;
+  });
+  // Detect if the browser supports history management
+  has.add('history-state', function(g){
+    return ('history' in g) && ('pushState' in history);
   });
   // Detect if the browser supports console
   has.add('console', function(g){
@@ -78,18 +85,23 @@ define(function(require, exports, module){
     }
   }
 
+  // Enable hijax
+  var enableHijax = has('history-state');
+
   // Intercept links
-  $(document).on('click', 'a.hijax', function(e){
-    if (e.ctrlKey || e.metaKey) {
-      return;
-    }
-    e.preventDefault();
-    var frag = this.href;
-    if (frag.indexOf(origin) === 0) {
-      frag = frag.substr(origin.length);
-    }
-    navigate(frag);
-  });
+  if (enableHijax) {
+    $(document).on('click', 'a.hijax', function(e){
+      if (e.ctrlKey || e.metaKey) {
+        return;
+      }
+      e.preventDefault();
+      var frag = this.href;
+      if (frag.indexOf(origin) === 0) {
+        frag = frag.substr(origin.length);
+      }
+      navigate(frag);
+    });
+  }
 
   var container = $('#container');
 
@@ -107,6 +119,10 @@ define(function(require, exports, module){
 
   var $win = $(window);
   function navigate(frag) {
+    if (! enableHijax) {
+      location.href = frag;
+      return;
+    }
     popping = false;
     router.navigate(frag, {trigger: true});
   }
@@ -156,11 +172,13 @@ define(function(require, exports, module){
   }
 
   var router = new Router();
-  Backbone.history.start({
-    pushState: true,
-    hashChange: false,
-    silent: true
-  });
+  if (enableHijax) {
+    Backbone.history.start({
+      pushState: true,
+      hashChange: false,
+      silent: true
+    });
+  }
   setAuthUrl();
 
   main.navigate = navigate;

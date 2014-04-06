@@ -1,0 +1,25 @@
+.container
+  .row
+    .col-md-8.col-md-offset-2
+      form#form-article(role='form', action=datum.update ? '/article/' + article.uri : '/article', method='post', autocomplete='off')
+        .form-group
+          label(for='input-article-title') 标题
+          input#input-article-title.form-control(name='title', type='text', placeholder='标题', value=datum.update ? article.title : '')
+        .form-group
+          label(for='textarea-article-content') 内容
+          textarea#textarea-article-content.form-control.text-code(name='content', rows='15', placeholder='内容')= datum.update ? article.content : ''
+        .form-group
+          label(for='textarea-article-summary') 摘要
+          textarea#textarea-article-summary.form-control.text-code(name='summary', rows='2', placeholder='摘要')= datum.update ? article.summary : ''
+        .form-group
+          label(for='input-article-uri') 链接名
+          input#input-article-uri.form-control(name='uri', type='text', placeholder='链接名', value=datum.update ? article.uri : '')
+        .form-group
+          label(for='input-ags') 标签
+          input#input-ags.form-control(name='tags', type='text', placeholder='标签', value=datum.update ? article.tags : '')
+        //- input#input-draft(name='draft', type='hidden', value='')
+        button#btn-save.btn.btn-primary(type='submit', data-loading-text='正在发布') 发布
+        |  
+        if datum.update
+          a.btn.btn-default.hijax(href='/article/' + article.uri, type='submit') 返回
+          input(name='_method', type='hidden', value='put')

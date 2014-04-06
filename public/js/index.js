@@ -1,8 +1,7 @@
 define(function(require, exports, module){
   var Pagelet = require('pagelet')
-    , _ = require('underscore')
     , has = require('has');
-  module.exports = _.extend(new Pagelet(), {
+  module.exports = Pagelet.factory({
     initialize: function(){
       if (has('svg-smil')) {
         var img = new Image();

@@ -3,7 +3,9 @@ define(function(require, exports, module){
     , _ = require('underscore')
     , Backbone = require('backbone')
     , main = require('main')
-    , Pagelet = require('pagelet');
+    , Pagelet = require('pagelet')
+    , has = require('has')
+    , inputEvent = has('oninput') ? 'input' : 'change';
 
   var uri;
   var Comment = Backbone.Model.extend({
@@ -34,8 +36,7 @@ define(function(require, exports, module){
         var textParent = this.$text.parent();
         textParent.addClass('has-error has-feedback')
             .append('<span class="glyphicon glyphicon-warning-sign form-control-feedback" style="bottom:0"></span>');
-        this.$text.on('change input', function(){
-          that.$text.off('change input');
+        this.$text.one(inputEvent, function(){
           textParent.removeClass('has-error has-feedback')
               .children('.form-control-feedback').remove();
         }).focus();
@@ -45,8 +46,7 @@ define(function(require, exports, module){
         var userParent = this.$user.parent();
         userParent.addClass('has-error has-feedback')
             .append('<span class="glyphicon glyphicon-warning-sign form-control-feedback" style="top:0"></span>');
-        this.$user.on('change input', function(){
-          that.$user.off('change input');
+        this.$user.one(inputEvent, function(){
           userParent.removeClass('has-error has-feedback')
               .children('.form-control-feedback').remove();
         }).focus();
@@ -174,7 +174,7 @@ define(function(require, exports, module){
 
   var app, comments;
 
-  module.exports = _.extend(new Pagelet(), {
+  module.exports = Pagelet.factory({
     initialize: function(datum){
       uri = datum.uri;
       comments = new CommentList();

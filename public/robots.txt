@@ -1,3 +1,2 @@
 User-agent: *
-Disallow: /auth
-Disallow: /auth/
+Disallow: /

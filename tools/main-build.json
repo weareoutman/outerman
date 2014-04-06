@@ -8,5 +8,8 @@
     "public/js/pagelet.js",
     "public/js/index.js"
   ],
-  "out": "public/js/main-built.js"
+  "out": "public/js/main-built.js",
+  "wrap": {
+    "startFile": "public/js/require.js"
+  }
 }

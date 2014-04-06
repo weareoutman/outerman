@@ -93,13 +93,18 @@ main.get('/', function(req, res, next){
 });
 
 main.get('/robots.txt', function(req, res){
-  res.sendfile(__dirname + '/public/robots.txt', {
+  res.sendfile(__dirname + '/robots.txt', {
     maxAge: 8.64e7 // 1天
   });
 });
 
 main.get('/README', function(req, res){
   res.sendfile(__dirname + '/README.md');
+});
+
+main.get('/thanks', function(req, res){
+  res.locals.title = 'Thanks to them' + conf.title_suffix;
+  res.renderHijax('thanks');
 });
 
 // 登录/验证
@@ -109,9 +114,9 @@ AuthController.use(main);
 ArticleController.use(main);
 
 // Google site verification
-main.get('/google040d868833adfa0a.html', function(req, res){
+/*main.get('/google040d868833adfa0a.html', function(req, res){
   res.send('google-site-verification: google040d868833adfa0a.html');
-});
+});*/
 
 // 404
 main.use(function(req, res, next){

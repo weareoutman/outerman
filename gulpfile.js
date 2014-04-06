@@ -11,7 +11,7 @@ confList.forEach(function(name){
   confs[name] = require('./tools/' + name + '-build.json');
 });
 
-var scripts = ['article', 'comments'];
+var scripts = ['article', 'comments', 'edit'];
 
 _.each(confs, function(conf, name){
   gulp.task('rjs:' + name, function(){
@@ -58,9 +58,9 @@ function bust(name) {
     if (file.isStream()) {
       return callback(new Error('Streaming not supported'));
     }
-    var sha1 = crypto.createHash('sha1').update(file.contents).digest('hex').substr(0,5);
+    var sha1 = crypto.createHash('sha1').update(file.contents).digest('hex').substr(0,10);
     gulp.src('views/layout.jade')
-      .pipe(replace(new RegExp('\\b(bust=' + name + ')(?:\\.(\\w+))?\\b'), '$1.' + sha1))
+      .pipe(replace(new RegExp('\\b(' + name + '(?:-built)?\\.(?:js|css)\\?bust=)(?:\\w+)?'), '$1' + sha1))
       .pipe(gulp.dest('views'));
     return callback();
   }

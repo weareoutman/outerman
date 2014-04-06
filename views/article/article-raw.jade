@@ -13,7 +13,7 @@
               a.text-muted= '#' + tag
           if user && user.admin
             |  &nbsp;[
-            a(href='/article/' + article.uri + '/edit') Edit
+            a.hijax(href='/article/' + article.uri + '/edit') Edit
             | ] &nbsp;[
             a(href='/article/' + article.uri + '/raw') Raw
             | ] &nbsp;[

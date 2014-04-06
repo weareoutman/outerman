@@ -102,7 +102,8 @@ function getById(id) {
 // post an article
 function post(body, user) {
   var data = _.pick(body, 'uri', 'title', 'content', 'summary', 'tags')
-    , tags = data.tags && data.tags.split(',');
+    , tags = data.tags && data.tags.split(',')
+    , keyUri2id = KEYS.uri2id(data.uri);
   data.user_id = user.id;
   data.update_time = data.create_time = Date.now();
 
@@ -110,7 +111,7 @@ function post(body, user) {
   return process(data)
   .then(function(){
     // check if uri existed
-    return db.existsAsync(KEYS.uri2id(data.uri));
+    return db.existsAsync(keyUri2id);
   }).then(function(exists){
     if (exists) {
       throw new ClientError(409);
@@ -122,7 +123,7 @@ function post(body, user) {
     var multi = db.multi();
     data.id = id;
     multi.hmset(KEYS.id2article(id), data);
-    multi.set(KEYS.uri2id(data.uri), id);
+    multi.set(keyUri2id, id);
     multi.lpush(KEYS.LIST, id);
     // multi.zadd(KEYS.UPDATE_TIME, data.update_time, id);
     if (tags && tags.length > 0) {
@@ -141,7 +142,9 @@ function post(body, user) {
 function put(old, body, user) {
   var data = _.pick(body, 'uri', 'title', 'content', 'summary', 'tags')
     , tags = data.tags && data.tags.split(',')
-    , id = old.id;
+    , id = old.id
+    , keyOldUri2id = KEYS.uri2id(old.uri)
+    , keyNewUri2id = KEYS.uri2id(data.uri);
   data.user_id = user.id;
   data.update_time = Date.now();
 
@@ -150,9 +153,15 @@ function put(old, body, user) {
   // markdown to html, and cut out the summary
   return process(data)
   .then(function(){
+    if (keyOldUri2id !== keyNewUri2id) {
+      // check if new uri existed
+      return db.existsAsync(keyNewUri2id);
+    }
+  }).then(function(exists){
+    if (exists) {
+      throw new ClientError(409);
+    }
     var multi = db.multi()
-      , keyOldUri2id = KEYS.uri2id(old.uri)
-      , keyNewUri2id = KEYS.uri2id(data.uri)
       , oldTags = old.tags && old.tags.split(',');
     if (keyOldUri2id !== keyNewUri2id) {
       // rename uri

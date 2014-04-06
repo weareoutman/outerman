@@ -1,5 +1,6 @@
 define(function(require, exports, module){
-  var map = {};
+  var _ = require('underscore')
+    , map = {};
   function Pagelet(){}
   Pagelet.prototype.initialize = function(){ return this; };
   Pagelet.prototype.destroy = function(){};
@@ -9,6 +10,9 @@ define(function(require, exports, module){
       map[key] = new Pagelet();
     }
     return map[key];
+  };
+  Pagelet.factory = function(options){
+    return _.extend(new Pagelet(), options);
   };
   module.exports = Pagelet;
 });

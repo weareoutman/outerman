@@ -6,7 +6,7 @@ html
     title= title
     meta(http-equiv='X-UA-Compatible', content='IE=edge')
     meta(name='viewport', content='width=device-width, initial-scale=1.0')
-    link(rel='stylesheet', href='http://weihub.com/css/style-built.css?bust=style.fc200')
+    link(rel='stylesheet', href='http://weihub.com/css/style-built.css?bust=fc20006dfb')
     if styles
       each style in styles
         link(rel='stylesheet', href='http://weihub.com/css/'+style)
@@ -72,24 +72,26 @@ html
           a(href='http://expressjs.com/', target='_blank') Express
           | , 
           a(href='http://getbootstrap.com/', target='_blank') Bootstrap
+          | , 
+          a.hijax(href='/thanks') &middot;&middot;&middot;
         .col-md-4.footer-right
           a(href='http://www.miibeian.gov.cn/', target='_blank') 粤ICP备12079626号-2
-    script(src='http://weihub.com/js/require.js')
-    script(src='http://weihub.com/js/main-built.js?bust=main.3ef0b')
     script.
-      require.config({
+      var require = ({
+        baseUrl: 'http://weihub.com/js/',
         paths: {
-          // index: 'index.js?bust=index.5edb3',
-          article: 'article.js?bust=article.46852',
-          comments: 'comments.js?bust=comments.fb52d',
+          edit: 'edit.js?bust=5c219d5a41',
+          article: 'article.js?bust=59dd5ca144',
+          comments: 'comments.js?bust=cbced44461',
         }
       });
+    script(src='http://weihub.com/js/main-built.js?bust=c0cd8b5bd6')
     script
-      - var requires = ['main']
+      - var pagelets = ['main']
       if script
-        - requires.push(script)
+        - pagelets.push(script)
       | require(
-      != JSON.stringify(requires)
+      != JSON.stringify(pagelets)
       | ,function(main,script){script&&(main.setCurrent(script.initialize(
       if datum
         != JSON.stringify(datum)
@@ -103,8 +105,3 @@ html
         })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
         ga('create', 'UA-48261249-2', 'wangshenwei.com');
         ga('send', 'pageview');
-    //- if scripts
-    //-   each script,i in scripts
-    //-     script(src=script)
-    block inlineScript
-

@@ -15,7 +15,7 @@
             tr
               td= comment.id
               td
-                a(href='/article/' + comment.article.uri)= comment.article.title
+                a.hijax(href='/article/' + comment.article.uri)= comment.article.title
               td= comment.user.fullname
               td= comment.content
               td= comment.str_create_time
