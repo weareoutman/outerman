@@ -169,6 +169,7 @@ define(function(require, exports, module){
       // Scroll to top if not from popstate
       scrollTo(0, 0);
     }
+    window.ga('send', 'pageview', path);
   }
 
   var router = new Router();

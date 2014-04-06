@@ -77,15 +77,15 @@ html
         .col-md-4.footer-right
           a(href='http://www.miibeian.gov.cn/', target='_blank') 粤ICP备12079626号-2
     script.
-      var require = ({
+      var require = {
         baseUrl: 'http://weihub.com/js/',
         paths: {
           edit: 'edit.js?bust=5c219d5a41',
           article: 'article.js?bust=59dd5ca144',
           comments: 'comments.js?bust=cbced44461',
         }
-      });
-    script(src='http://weihub.com/js/main-built.js?bust=c0cd8b5bd6')
+      };
+    script(src='http://weihub.com/js/main-built.js?bust=81f742a612')
     script
       - var pagelets = ['main']
       if script
@@ -96,7 +96,7 @@ html
       if datum
         != JSON.stringify(datum)
       | )))});
-    if !DEV
+    if !DEV||true
       script.
         // Google analytics
         (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
