@@ -93,8 +93,8 @@ exports.use = function(app) {
 
   // Article raw markdown content
   app.get('/article/:uri/raw', get, function(req, res){
-    res.charset = 'utf-8';
-    res.type('txt').send(res.locals.article.content);
+    res.set('Content-Type', 'text/plain; charset=utf-8');
+    res.send(res.locals.article.content);
   });
 };
 
