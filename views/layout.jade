@@ -7,13 +7,9 @@ html
     meta(http-equiv='X-UA-Compatible', content='IE=edge')
     meta(name='viewport', content='width=device-width, initial-scale=1.0')
     link(rel='stylesheet', href='http://weihub.com/css/style-built.css?bust=fc20006dfb')
-    if styles
-      each style in styles
-        link(rel='stylesheet', href='http://weihub.com/css/'+style)
     // HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries
     != '<!--[if lt IE 9]>'
     != '<script src="http://weihub.com/js/html5shiv.js"></script>'
-    != '<script src="http://weihub.com/js/respond.min.js"></script>'
     != '<![endif]-->'
   body
     header#navbar.navbar.navbar-default.navbar-static-top(role='banner')
@@ -36,9 +32,6 @@ html
                 a.hijax(href='/comments')
                   span.glyphicon.glyphicon-comment
                   |  评论
-          //- form.navbar-form.navbar-left(action='http://www.google.com.hk/search', method='get', role='search')
-          //-   .form-group
-          //-     input.form-control(type='search', name='q', autocapitalize='off', autocomplete='off', spellcheck='false', placeholder='搜索')
           ul.nav.navbar-nav.navbar-right
             if user
               li
@@ -96,7 +89,7 @@ html
       if datum
         != JSON.stringify(datum)
       | )))});
-    if !DEV||true
+    if ! DEV
       script.
         // Google analytics
         (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
