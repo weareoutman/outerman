@@ -15,7 +15,10 @@ var express = require('express')
   , main = express()
   , mainLog = fs.createWriteStream('./log/main.log', {flags: 'a'})
   , staticLog = fs.createWriteStream('./log/static.log', {flags: 'a'})
-  , dev = app.get('env') === 'development';
+  , dev = app.get('env') === 'development'
+  , format = 'YYYY/MM/DD HH:mm:ss';
+
+var startedAt = moment().format(format);
 
 var RedisStore = require('connect-redis')(express);
 
@@ -92,6 +95,12 @@ main.get('/', function(req, res, next){
   }).catch(next);
 });
 
+// 文章
+ArticleController.use(main);
+
+// 登录/验证
+AuthController.use(main);
+
 main.get('/robots.txt', function(req, res){
   res.sendfile(__dirname + '/robots.txt', {
     maxAge: 8.64e7 // 1天
@@ -107,11 +116,29 @@ main.get('/thanks', function(req, res){
   res.renderHijax('thanks');
 });
 
-// 登录/验证
-AuthController.use(main);
-
-// 文章
-ArticleController.use(main);
+main.get('/uptime', function(req, res){
+  var usage = process.memoryUsage()
+    , duration = moment.duration(process.uptime() * 1e3)
+    , uptime = []
+    , days = Math.floor(duration.asDays())
+    , hours = duration.hours()
+    , minutes = duration.minutes()
+    , seconds = duration.seconds();
+  if (days > 0) {
+    uptime.push(days + 'd');
+  }
+  if (hours > 0 || days > 0) {
+    uptime.push(hours + 'h');
+  }
+  if (minutes > 0 || hours > 0 || days > 0) {
+    uptime.push(minutes + 'm');
+  }
+  uptime.push(seconds + 's');
+  usage.startedAt = startedAt;
+  usage.now = moment().format(format);
+  usage.uptime = uptime.join(' ');
+  res.send(usage);
+});
 
 // Google site verification
 /*main.get('/google040d868833adfa0a.html', function(req, res){
@@ -163,4 +190,4 @@ app.use(express.vhost('www.wangshenwei.com', wwwServer));
 
 app.listen(conf.port, conf.host);
 console.log('[%s] Express started listen on %s:%s, in %s mode',
-  new Date().toUTCString(), conf.host, conf.port, app.get('env'));
+    startedAt, conf.host, conf.port, app.get('env'));
