@@ -57,6 +57,7 @@ define(function(require, exports, module){
 
   main.setCurrent = function(pagelet){
     current = pagelet;
+    return current;
   };
 
   var origin = location.origin ||
@@ -103,9 +104,11 @@ define(function(require, exports, module){
     });
   }
 
-  var container = $('#container');
+  var $win = $(window)
+    , container = $('#container')
+    , popping = true
+    , hijaxReq;
 
-  var popping = true;
   var Router = Backbone.Router.extend({
     routes: {
       '*path': 'any',
@@ -117,7 +120,6 @@ define(function(require, exports, module){
     }
   });
 
-  var $win = $(window);
   function navigate(frag) {
     if (! enableHijax) {
       location.href = frag;
@@ -135,7 +137,10 @@ define(function(require, exports, module){
       current.destroy();
       current = null;
     }
-    $.ajax({
+    if (hijaxReq) {
+      hijaxReq.abort();
+    }
+    hijaxReq = $.ajax({
       url: path,
       data: {
         hijax: 1
@@ -143,12 +148,17 @@ define(function(require, exports, module){
       dataType: 'json'
     }).done(function(d){
       render(d, path, popped);
+    }).fail(function(xhr, error){
+      if (error === 'abort') {
+        return;
+      }
+      if (xhr.responseJSON) {
+        return render(xhr.responseJSON, path, popped);
+      }
+      main.log('unexpected error', error);
     }).always(function(){
       NProgress.done();
-    }).fail(function(xhr, status, error){
-      if (xhr.responseJSON) {
-        render(xhr.responseJSON, path, popped);
-      }
+      hijaxReq = null;
     });
   }
 
@@ -160,7 +170,7 @@ define(function(require, exports, module){
     $('#navbar-collapse').removeClass('in');
     if (d.script) {
       require([].concat(d.script), function(pagelet){
-        current = pagelet.initialize(d.datum);
+        (current = pagelet).initialize(d.datum);
       });
     } else {
       current = Pagelet.defaults(path);

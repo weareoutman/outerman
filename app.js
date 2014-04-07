@@ -183,7 +183,7 @@ wwwServer.all('*', function(req, res){
   res.redirect(301, 'http://wangshenwei.com' + req.originalUrl);
 });
 
-app.enable('trust proxy');
+// app.enable('trust proxy');
 app.use(express.vhost('wangshenwei.com', main));
 app.use(express.vhost('weihub.com', staticServer));
 app.use(express.vhost('www.wangshenwei.com', wwwServer));

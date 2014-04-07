@@ -9,7 +9,6 @@ define(function(require, exports, module){
         img.setAttribute('width', '100%');
         document.getElementById('running-car').appendChild(img);
       }
-      return this;
     }
   });
 });

@@ -48,7 +48,7 @@ var Promise = require('bluebird')
   , LIMIT_IP_EXPIRE = 600
   , LIMIT_IP_COUNT = 2
   , LIMIT_USER_EXPIRE = 300
-  , LIMIT_USER_COUNT = 2
+  , LIMIT_USER_COUNT = 10
   , MAX_CONTENT_LENGTH = 500
   , MAX_GUEST_NAME_LENGTH = 32
   , KEYS = {
@@ -240,7 +240,8 @@ exports.post = function(articleId, body, user, ip) {
     if (hash === sign) {
       throw new ClientError(409);
     }
-  }).then(function(){
+  })
+  .then(function(){
     // incr id cursor
     return db.incrAsync(KEYS.CURSOR);
   }).then(function(id){

@@ -69,22 +69,22 @@ html
       var require = {
         baseUrl: 'http://weihub.com/js/',
         paths: {
-          edit: 'edit.js?bust=5c219d5a41',
-          article: 'article.js?bust=59dd5ca144',
-          comments: 'comments.js?bust=cbced44461',
+          edit: 'edit.js?bust=371bf1a5c9',
+          article: 'article.js?bust=34bd702526',
+          comments: 'comments.js?bust=286c6b8a49',
         }
       };
-    script(src='http://weihub.com/js/main-built.js?bust=001143e79e')
+    script(src='http://weihub.com/js/main-built.js?bust=c8aca45069')
     script
       - var pagelets = ['main']
       if script
         - pagelets.push(script)
       | require(
       != JSON.stringify(pagelets)
-      | ,function(main,script){script&&(main.setCurrent(script.initialize(
+      | ,function(main,pagelet){pagelet&&(main.setCurrent(pagelet).initialize(
       if datum
         != JSON.stringify(datum)
-      | )))});
+      | ))});
     if ! DEV
       script.
         // Google analytics

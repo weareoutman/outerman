@@ -68,44 +68,45 @@ define(function(require, exports, module){
     },
     submit: function(e){
       var that = this;
-      this.model.save(this.getAttibutes(), {
+      var xhr = this.model.save(this.getAttibutes(), {
         wait: true,
         beforeSend: function(){
           that.$submit.button('loading');
           _.each(that.$elements, function($elem){
             $elem.prop('readOnly', true);
           });
-        },
-        success: function(model){
-          main.navigate('/article/' + model.attributes.uri);
-        },
-        error: function(model, res){
-          var msg;
-          switch (res.status) {
-            case 400:
-              msg = '提交的数据有误！';
-              break;
-            case 403:
-              msg = '你没有权限！';
-              break;
-            case 404:
-              msg = '要更新的文章不存在！';
-              break;
-            case 409:
-              msg = '链接名重复了！';
-              break;
-            default:
-              msg = res.statusText || 'Unknow Error';
-          }
-          alert(msg);
-        },
-        complete: function(){
-          that.$submit.button('reset');
-          _.each(that.$elements, function($elem){
-            $elem.prop('readOnly', false);
-          });
         }
+      }).done(function(){
+        main.navigate('/article/' + that.model.attributes.uri);
+      }).fail(function(res, error){
+        if (error === 'abort') {
+          return;
+        }
+        var msg;
+        switch (res.status) {
+          case 400:
+            msg = '提交的数据有误！';
+            break;
+          case 403:
+            msg = '你没有权限！';
+            break;
+          case 404:
+            msg = '要更新的文章不存在！';
+            break;
+          case 409:
+            msg = '链接名重复了！';
+            break;
+          default:
+            msg = res.statusText || 'Unknow Error';
+        }
+        alert(msg);
+      }).always(function(){
+        that.$submit.button('reset');
+        _.each(that.$elements, function($elem){
+          $elem.prop('readOnly', false);
+        });
       });
+      app.collect(xhr);
       return false;
     },
     getAttibutes: function(){
@@ -118,15 +119,16 @@ define(function(require, exports, module){
     }
   });
 
-  var app;
-  module.exports = Pagelet.factory({
+  var view;
+  var app = module.exports = Pagelet.factory({
     initialize: function(datum){
-      app = new ArticleView({
+      view = new ArticleView({
         datum: datum
       });
     },
     destroy: function(){
-      app.stopListening();
+      view.stopListening();
+      this.clear();
     }
   });
 });

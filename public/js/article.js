@@ -55,39 +55,43 @@ define(function(require, exports, module){
       this.$submit.prop('disabled', true);
       this.$text.prop('readOnly', true);
       this.$user.prop('readOnly', true);
-      comments.create({
+      // Post a comment
+      var model = new Comment({
         content: content,
-        html: content,
         user: user
       }, {
-        wait: true,
-        success: function(){
-          that.$text.val('');
-          scrollTo(0, 99999);
-        },
-        error: function(col, res){
-          var msg;
-          switch (res.status) {
-            case 403:
-              msg = '你消停点！';
-              break;
-            case 409:
-              msg = '你是复读机吗？';
-              break;
-            case 413:
-              msg = '你的话太多了！';
-              break;
-            default:
-              msg = res.statusText || 'Unknow Error';
-          }
-          alert(msg);
-        },
-        complete: function(){
-          that.$text.prop('readOnly', false);
-          that.$user.prop('readOnly', false);
-          that.$submit.prop('disabled', false);
-        }
+        collection: comments
       });
+      var xhr = model.save();
+      xhr.done(function(){
+        comments.add(model);
+        that.$text.val('');
+        scrollTo(0, 99999);
+      }).fail(function(res, error){
+        if (error === 'abort') {
+          return;
+        }
+        var msg;
+        switch (res.status) {
+          case 403:
+            msg = '你消停点！';
+            break;
+          case 409:
+            msg = '你是复读机吗？';
+            break;
+          case 413:
+            msg = '你的话太多了！';
+            break;
+          default:
+            msg = res.statusText || 'Unknow Error';
+        }
+        alert(msg);
+      }).always(function(){
+        that.$text.prop('readOnly', false);
+        that.$user.prop('readOnly', false);
+        that.$submit.prop('disabled', false);
+      });
+      app.collect(xhr);
     },
     initialize: function(){
       var that = this;
@@ -104,18 +108,18 @@ define(function(require, exports, module){
       this.$text.one('focus', function(){
         $('#comment-btns').removeClass('hidden');
       });
-      comments.fetch({
-        success: function(){
-          // alert('success');
-          that.updateMinutes();
-        },
-        error: function(col, res){
-          // alert(res.statusText || 'Unknow Error');
-        },
-        complete: function(){
-          $('#comment-loading').hide();
+      // Fetch comments
+      var xhr = comments.fetch()
+      .done(function(){
+        that.updateMinutes();
+      }).fail(function(res, error){
+        if (error === 'abort') {
+          return;
         }
+      }).always(function(){
+        $('#comment-loading').hide();
       });
+      app.collect(xhr);
     },
     render: function(){
       $('#comment-badge').html(comments.length || '');
@@ -158,35 +162,38 @@ define(function(require, exports, module){
 
   function toDeleteArticle() {
     if (confirm('确认删除这篇文章吗？')) {
-      $.ajax({
+      // Delete article
+      var xhr = $.ajax({
         url: '/article/' + uri,
         type: 'DELETE',
         dataType: 'json'
       }).done(function(d){
         main.navigate('/article');
-      }).fail(function(xhr, status){
-        alert(status);
+      }).fail(function(res, error){
+        if (error === 'abort') {
+          return;
+        }
+        alert(error);
       });
+      app.collect(xhr);
     }
   }
 
-  var btnDelete = $('#btn-delete');
+  var view, comments, btnDelete;
 
-  var app, comments;
-
-  module.exports = Pagelet.factory({
+  var app = module.exports = Pagelet.factory({
     initialize: function(datum){
       uri = datum.uri;
       comments = new CommentList();
-      app = new AppView();
-      btnDelete.click(toDeleteArticle);
-      return this;
+      view = new AppView();
+      btnDelete = $('#btn-delete').click(toDeleteArticle);
     },
     destroy: function(){
-      app.stopListening();
-      app.stopUpdateMinutes();
+      view.stopListening();
+      view.stopUpdateMinutes();
       comments.stopListening();
       btnDelete.off('click');
+      this.clear();
     }
   });
 
