@@ -11,8 +11,8 @@ define(function(require, exports, module){
         img_width: 128,
         img_height: 128,
         link: location.toString(),
-        title: document.title.replace(' - Wang Shenwei', ''),
-        desc: document.title
+        title: document.title,
+        desc: document.title.replace(' - WangShenwei.com', '')
       });
     });
   }

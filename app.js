@@ -88,7 +88,7 @@ main.set('view engine', 'jade');
 main.get('/', function(req, res, next){
   ArticleModel.list()
   .then(function(list){
-    res.locals.title = 'Wang Shenwei';
+    res.locals.title = '你好，世界，我是王沈伟';
     res.locals.script = 'index';
     res.locals.articleList = list;
     res.renderHijax('index');
