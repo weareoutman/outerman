@@ -24,7 +24,7 @@ define(function(require, exports, module){
       if (! /^[\w\-]+$/.test(attributes.uri)) {
         return 'uri';
       }
-      if (attributes.tags && ! /^[\w\-]+(\,[\w\-])*$/.test(attributes.tags)) {
+      if (attributes.tags && ! /^[\w\-]+(\,[\w\-]+)*$/.test(attributes.tags)) {
         return 'tags';
       }
     },
@@ -76,7 +76,11 @@ define(function(require, exports, module){
             $elem.prop('readOnly', true);
           });
         }
-      }).done(function(){
+      });
+      if (! xhr) {
+        return false;
+      }
+      xhr.done(function(){
         main.navigate('/article/' + that.model.attributes.uri);
       }).fail(function(res, error){
         if (error === 'abort') {
