@@ -181,12 +181,17 @@ define(function(require, exports, module){
 
   var view, comments, btnDelete;
 
+  var inWeixin = /MicroMessenger/.test(navigator.userAgent);
+
   var app = module.exports = Pagelet.factory({
     initialize: function(datum){
       uri = datum.uri;
       comments = new CommentList();
       view = new AppView();
       btnDelete = $('#btn-delete').click(toDeleteArticle);
+      if (inWeixin) {
+        require('weixin')();
+      }
     },
     destroy: function(){
       view.stopListening();
