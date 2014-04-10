@@ -10,7 +10,7 @@
             | ,
             each tag in tags
               |  
-              a.text-muted(href='/tag/' + tag)= '#' + tag
+              a.text-muted.hijax(href='/tag/' + tag)= '#' + tag
           if user && user.admin
             |  &nbsp;[
             a.hijax(href='/article/' + article.uri + '/edit') Edit

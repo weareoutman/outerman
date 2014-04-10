@@ -22,7 +22,7 @@
                         | ,
                         each tag in tags
                           |  
-                          a.text-muted(href='/tag/' + tag)= '#' + tag
+                          a.text-muted.hijax(href='/tag/' + tag)= '#' + tag
                   div= article.summary
                     |  ...
 #running-car

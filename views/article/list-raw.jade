@@ -18,7 +18,7 @@
                       | ,
                       each tag in tags
                         |  
-                        a.text-muted(href='/tag/' + tag)= '#' + tag
+                        a.text-muted.hijax(href='/tag/' + tag)= '#' + tag
                   //- small.pull-right
                   //-   a.text-muted(href='/article/'+article.uri+'#comments')
                   //-     span.glyphicon.glyphicon-comment
