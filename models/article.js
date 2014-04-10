@@ -21,6 +21,7 @@ SADD article:tag:[tag] [id]
 
 var ArticleModel = {
   list: list,
+  listByTag: listByTag,
   get: get,
   getById: getById,
   post: post,
@@ -40,6 +41,7 @@ var Promise = require('bluebird')
   , CommentModel = require('./comment')
   , markedAsync = Promise.promisify(marked)
   , MAX_SUMMARY_LENGTH = 180
+  , regUri = /^[\w\-]+(\,[\w\-]+)*$/
   , KEYS = {
     CURSOR: 'article:cursor',
     LIST: 'article:list',
@@ -67,6 +69,16 @@ var Promise = require('bluebird')
 // get article list
 function list() {
   return db.lrangeAsync(KEYS.LIST, 0, -1)
+  .then(listByIds);
+}
+
+function listByTag(tag) {
+  return db.zrevrangeAsync(KEYS.tag2id(tag), 0, -1)
+  .then(listByIds);
+}
+
+function listByIds(ids) {
+  return Promise.resolve(ids)
   .then(function(ids){
     if (ids.length === 0) {
       return [];
@@ -104,6 +116,12 @@ function post(body, user) {
   var data = _.pick(body, 'uri', 'title', 'content', 'summary', 'tags')
     , tags = data.tags && data.tags.split(',')
     , keyUri2id = KEYS.uri2id(data.uri);
+
+  // invalid uri
+  if (! regUri.test(data.uri)) {
+    throw ClientError(400);
+  }
+
   data.user_id = user.id;
   data.update_time = data.create_time = Date.now();
 
@@ -128,7 +146,7 @@ function post(body, user) {
     // multi.zadd(KEYS.UPDATE_TIME, data.update_time, id);
     if (tags && tags.length > 0) {
       tags.forEach(function(tag, i){
-        multi.sadd(KEYS.tag2id(tag), id);
+        multi.zadd(KEYS.tag2id(tag), id, id);
       });
     }
     return Promise.promisify(multi.exec, multi)();
@@ -145,6 +163,12 @@ function put(old, body, user) {
     , id = old.id
     , keyOldUri2id = KEYS.uri2id(old.uri)
     , keyNewUri2id = KEYS.uri2id(data.uri);
+
+  // invalid uri
+  if (! regUri.test(data.uri)) {
+    throw ClientError(400);
+  }
+
   data.user_id = user.id;
   data.update_time = Date.now();
 
@@ -172,13 +196,13 @@ function put(old, body, user) {
     if (oldTags && oldTags.length > 0) {
       // remove old tags
       oldTags.forEach(function(tag){
-        multi.srem(KEYS.tag2id(tag), id);
+        multi.zrem(KEYS.tag2id(tag), id);
       });
     }
     if (tags && tags.length > 0) {
       // save new tags
       tags.forEach(function(tag, i){
-        multi.sadd(KEYS.tag2id(tag), id);
+        multi.zadd(KEYS.tag2id(tag), id, id);
       });
     }
     return Promise.promisify(multi.exec, multi)();
@@ -208,7 +232,7 @@ function remove(article, user) {
   multi.renamenx(KEYS.uri2id(uri), TRASH.uri2id(uri));
   if (tags && tags.length > 0) {
     tags.forEach(function(tag){
-      multi.srem(KEYS.tag2id(tag), id);
+      multi.zrem(KEYS.tag2id(tag), id);
     });
   }
   return Promise.promisify(multi.exec, multi)()

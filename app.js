@@ -27,7 +27,7 @@ main.locals.DEV = dev;
 main.enable('case sensitive routing');
 
 // log
-var logFormat = ':req[X-Real-IP] - - [:date] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" ":req[X-Forwarded-For]"';
+var logFormat = ':remote-addr - - [:date] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" ":req[X-Forwarded-For]"';
 if (dev) {
   logFormat = 'dev';
   Promise.longStackTraces();

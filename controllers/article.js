@@ -96,11 +96,28 @@ exports.use = function(app) {
     res.set('Content-Type', 'text/plain; charset=utf-8');
     res.send(res.locals.article.content);
   });
+
+  // Get article list by tag
+  app.get('/tag/:tag', listByTag, function(req, res){
+    res.locals.title = '文章列表 #' + res.locals.tag + conf.title_suffix;
+    res.locals.nav = 'article';
+    res.renderHijax('article/list');
+  });
 };
 
 function list(req, res, next) {
   ArticleModel.list()
   .then(function(list){
+    res.locals.list = list;
+    next();
+  }).catch(next);
+}
+
+function listByTag(req, res, next) {
+  var tag = req.params.tag;
+  ArticleModel.listByTag(tag)
+  .then(function(list){
+    res.locals.tag = tag;
     res.locals.list = list;
     next();
   }).catch(next);
