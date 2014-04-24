@@ -15,8 +15,11 @@
           label(for='input-article-uri') 链接名
           input#input-article-uri.form-control(name='uri', type='text', placeholder='链接名', value=datum.update ? article.uri : '')
         .form-group
-          label(for='input-ags') 标签
-          input#input-ags.form-control(name='tags', type='text', placeholder='标签', value=datum.update ? article.tags : '')
+          label(for='input-tags') 标签
+          input#input-tags.form-control(name='tags', type='text', placeholder='标签', value=datum.update ? article.tags : '')
+        .form-group
+          label(for='input-script') 脚本
+          input#input-script.form-control(name='script', type='text', placeholder='标签', value=datum.update ? article.script : '')
         //- input#input-draft(name='draft', type='hidden', value='')
         button#btn-save.btn.btn-primary(type='submit', data-loading-text='正在发布') 发布
         |  

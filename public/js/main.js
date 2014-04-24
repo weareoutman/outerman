@@ -135,6 +135,9 @@ define(function(require, exports, module){
     NProgress.start();
     if (current) {
       current.destroy();
+      if (current.other) {
+        current.other.destroy();
+      }
       current = null;
     }
     if (hijaxReq) {
@@ -169,8 +172,12 @@ define(function(require, exports, module){
     setAuthUrl();
     $('#navbar-collapse').removeClass('in');
     if (d.script) {
-      require([].concat(d.script), function(pagelet){
+      require([].concat(d.script), function(pagelet, other){
         (current = pagelet).initialize(d.datum);
+        if (other) {
+          pagelet.other = other;
+          other.initialize();
+        }
       });
     } else {
       current = Pagelet.defaults(path);

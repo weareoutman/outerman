@@ -74,17 +74,17 @@ html
           comments: 'comments.js?bust=286c6b8a49',
         }
       };
-    script(src='http://weihub.com/js/main-built.js?bust=c8aca45069')
+    script(src='http://weihub.com/js/main-built.js?bust=a88dbe93d4')
     script
       - var pagelets = ['main']
       if script
-        - pagelets.push(script)
+        - pagelets = pagelets.concat(script)
       | require(
       != JSON.stringify(pagelets)
-      | ,function(main,pagelet){pagelet&&(main.setCurrent(pagelet).initialize(
+      | ,function(main,pagelet,other){pagelet&&(main.setCurrent(pagelet).initialize(
       if datum
         != JSON.stringify(datum)
-      | ))});
+      | ));pagelet&&other&&(pagelet.other=other)&&other.initialize()});
     if ! DEV
       script.
         // Google analytics

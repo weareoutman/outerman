@@ -26,8 +26,9 @@ exports.use = function(app) {
   // View an article
   app.get('/article/:uri', get, function(req, res){
     res.locals.title = res.locals.article.title + conf.title_suffix;
+    var script = res.locals.article.script;
     res.locals.nav = 'article';
-    res.locals.script = 'article';
+    res.locals.script = script ? ['article', script] : 'article';
     res.locals.datum = _.pick(res.locals.article, 'uri');
     res.renderHijax('article/article');
   });
