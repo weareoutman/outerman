@@ -27,6 +27,9 @@ define(function(require, exports, module){
       if (attributes.tags && ! /^[\w\-]+(\,[\w\-]+)*$/.test(attributes.tags)) {
         return 'tags';
       }
+      if (! /^[\w\-]+$/.test(attributes.script)) {
+        return 'script';
+      }
     },
     initialize: function(){}
   });
@@ -37,7 +40,7 @@ define(function(require, exports, module){
       'submit': 'submit',
       'invalid': 'invalid'
     },
-    names: ['title', 'content', 'summary', 'tags', 'uri'],
+    names: ['title', 'content', 'summary', 'tags', 'uri', 'script'],
     initialize: function(options){
       var that = this;
       this.$elements = {};
@@ -51,7 +54,6 @@ define(function(require, exports, module){
       }
       this.model = new Article(attr);
       this.model.datum = options.datum;
-
 
       this.$submit = $('#btn-save');
       this.listenTo(this.model, 'invalid', this.invalid);

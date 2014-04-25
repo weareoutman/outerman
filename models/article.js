@@ -10,6 +10,7 @@ HMSET article:id:[id] {
   content: [content],
   html: [html],
   tags: [tags],
+  script: [script],
   create_time: [create_time],
   update_time: [update_time]
 }
@@ -113,7 +114,7 @@ function getById(id) {
 
 // post an article
 function post(body, user) {
-  var data = _.pick(body, 'uri', 'title', 'content', 'summary', 'tags')
+  var data = _.pick(body, 'uri', 'title', 'content', 'summary', 'tags', 'script')
     , tags = data.tags && data.tags.split(',')
     , keyUri2id = KEYS.uri2id(data.uri);
 
@@ -158,7 +159,7 @@ function post(body, user) {
 
 // update an article
 function put(old, body, user) {
-  var data = _.pick(body, 'uri', 'title', 'content', 'summary', 'tags')
+  var data = _.pick(body, 'uri', 'title', 'content', 'summary', 'tags', 'script')
     , tags = data.tags && data.tags.split(',')
     , id = old.id
     , keyOldUri2id = KEYS.uri2id(old.uri)
