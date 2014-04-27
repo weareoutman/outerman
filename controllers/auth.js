@@ -2,9 +2,11 @@
 
 var util = require('util')
   , _ = require('underscore')
+  , express = require('express')
   , conf = require('../config')
   , UserController = require('./user')
   , ClientError = require('../lib/errors').ClientError
+  , router = express.Router()
   , regPath = /^\/($|[^\/]+)/
   , regAuth = /^\/auth($|[\/\?#])/
   , oauthMap = {
@@ -37,60 +39,62 @@ function before(req, res, next){
   return next(new ClientError(400));
 }
 
-exports.use = function(app){
-  // Auth page
-  app.get('/auth', function auth(req, res, next) {
-    var path = req.query.path;
-    if (! regPath.test(path) || regAuth.test(path)) {
-      path = '/';
-    }
-    res.locals.path = encodeURIComponent(path);
-    res.locals.title = '登录' + conf.title_suffix;
-    res.locals.nav = 'auth';
-    res.renderHijax('auth');
-  });
+// Auth page
+router.get('/', function auth(req, res, next) {
+  var path = req.query.path;
+  if (! regPath.test(path) || regAuth.test(path)) {
+    path = '/';
+  }
+  res.locals.path = encodeURIComponent(path);
+  res.locals.title = '登录' + conf.title_suffix;
+  res.locals.nav = 'auth';
+  res.renderHijax('auth');
+});
 
-  // Auth redirect
-  app.get('/auth/redirect/:site', function(req, res, next){
-    var site = req.params.site;
-    if (oauthMap.hasOwnProperty(site) === -1) {
-      return next();
-    }
-    var path = req.query.path
-      , state = Math.random().toString(36).replace('.', '');
-    if (! regPath.test(path) || regAuth.test(path)) {
-      path = '/';
-    }
-    req.session.state = state;
-    state = encodeURIComponent(state + '.' + path);
-    res.redirect(util.format(oauthMap[site], conf[site].client_id, conf[site].redirect_uri, state));
-  });
+// Auth redirect
+router.get('/redirect/:site', function(req, res, next){
+  var site = req.params.site;
+  if (oauthMap.hasOwnProperty(site) === -1) {
+    return next();
+  }
+  var path = req.query.path
+    , state = Math.random().toString(36).replace('.', '');
+  if (! regPath.test(path) || regAuth.test(path)) {
+    path = '/';
+  }
+  req.session.state = state;
+  state = encodeURIComponent(state + '.' + path);
+  res.redirect(util.format(oauthMap[site], conf[site].client_id, conf[site].redirect_uri, state));
+});
 
-  // Auth callback
-  _.each(oauthMap, function(item, site){
-    app.get('/auth/' + site, before, require('../lib/' + site).auth, UserController.authed, function(req, res){
-        var url = req.redirectUrl;
-        if (regAuth.test(url)) {
-          url = '/';
-        }
-        res.redirect(url);
-    });
-  });
-
-  // Sign out
-  app.get('/signout', function(req, res){
-    var path = req.query.path;
-    if (! regPath.test(path) || regAuth.test(path)) {
-      path = '/';
-    }
-    req.session.destroy(function(err){
-      if (err) {
-        console.error(err);
+// Auth callback
+_.each(oauthMap, function(item, site){
+  router.get('/' + site, before, require('../lib/' + site).auth, UserController.authed, function(req, res){
+      var url = req.redirectUrl;
+      if (regAuth.test(url)) {
+        url = '/';
       }
-      res.clearCookie('uid');
-      res.clearCookie('usign');
-      res.clearCookie('usalt');
-      res.redirect(path);
-    });
+      res.redirect(url);
   });
-};
+});
+
+exports.index = router;
+
+exports.signout = express.Router();
+
+// Sign out
+exports.signout.get('/', function(req, res){
+  var path = req.query.path;
+  if (! regPath.test(path) || regAuth.test(path)) {
+    path = '/';
+  }
+  req.session.destroy(function(err){
+    if (err) {
+      console.error(err);
+    }
+    res.clearCookie('uid');
+    res.clearCookie('usign');
+    res.clearCookie('usalt');
+    res.redirect(path);
+  });
+});
