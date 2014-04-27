@@ -13,6 +13,9 @@ define(function(require, exports, module){
         $('#cp-demo').clockpicker()
           .find('input').prop('readOnly', true);
       });
+    },
+    destroy: function(){
+      $('#cp-demo').clockpicker('remove');
     }
   });
 });

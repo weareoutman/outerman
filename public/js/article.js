@@ -190,7 +190,7 @@ define(function(require, exports, module){
       view = new AppView();
       btnDelete = $('#btn-delete').click(toDeleteArticle);
       if (inWeixin) {
-        require('weixin')();
+        require(['weixin'], function(weixin){ weixin(); });
       }
     },
     destroy: function(){

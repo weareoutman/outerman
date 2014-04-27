@@ -71,20 +71,16 @@ html
         paths: {
           edit: 'edit.js?bust=ad2d7847bb',
           article: 'article.js?bust=c04d7d1028',
-          comments: 'comments.js?bust=286c6b8a49',
+          comments: 'comments.js?bust=286c6b8a49'
         }
       };
-    script(src='http://weihub.com/js/main-built.js?bust=a88dbe93d4')
+    script(src='http://weihub.com/js/main-built.js?bust=3ee370d722')
     script
-      - var pagelets = ['main']
-      if script
-        - pagelets = pagelets.concat(script)
       | require(
-      != JSON.stringify(pagelets)
-      | ,function(main,pagelet,other){pagelet&&(main.setCurrent(pagelet).initialize(
-      if datum
-        != JSON.stringify(datum)
-      | ));pagelet&&other&&(pagelet.other=other)&&other.initialize()});
+      != JSON.stringify(['main'].concat(script || []))
+      | ,function(main){main.setCurrent(Array.prototype.slice.call(arguments,1),
+      != JSON.stringify(datum || null)
+      | )});
     if ! DEV
       script.
         // Google analytics

@@ -14,6 +14,7 @@ require.config({
 define(function(require, exports, module){
   var $ = require('jquery')
     , bs = require('bootstrap')
+    , _ = require('underscore')
     , Backbone = require('backbone')
     , NProgress = require('nprogress')
     , Pagelet = require('pagelet')
@@ -55,9 +56,14 @@ define(function(require, exports, module){
     window.console.log.apply(window.console, arguments);
   };
 
-  main.setCurrent = function(pagelet){
-    current = pagelet;
-    return current;
+  main.setCurrent = function(pagelets, datum) {
+    current = [];
+    _.each(pagelets, function(pagelet){
+      if (pagelet) {
+        current.push(pagelet);
+        pagelet.initialize(datum);
+      }
+    });
   };
 
   var origin = location.origin ||
@@ -134,10 +140,9 @@ define(function(require, exports, module){
     popping = true;
     NProgress.start();
     if (current) {
-      current.destroy();
-      if (current.other) {
-        current.other.destroy();
-      }
+      _.each(current, function(pagelet){
+        pagelet.destroy();
+      });
       current = null;
     }
     if (hijaxReq) {
@@ -172,15 +177,12 @@ define(function(require, exports, module){
     setAuthUrl();
     $('#navbar-collapse').removeClass('in');
     if (d.script) {
-      require([].concat(d.script), function(pagelet, other){
-        (current = pagelet).initialize(d.datum);
-        if (other) {
-          pagelet.other = other;
-          other.initialize();
-        }
+      require([].concat(d.script), function(){
+        main.setCurrent(arguments, d.datum);
       });
     } else {
-      current = Pagelet.defaults(path);
+      // current = Pagelet.defaults(path);
+      current = null;
     }
     if (! popped) {
       // Scroll to top if not from popstate

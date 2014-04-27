@@ -3,6 +3,14 @@ var express = require('express')
   , Promise = require('bluebird')
   , _ = require('underscore')
   , moment = require('moment')
+  , compress = require('compression')
+  , logger = require('morgan')
+  , cookieParser = require('cookie-parser')
+  , bodyParser = require('body-parser')
+  , session = require('express-session')
+  , favicon = require('static-favicon')
+  , methodOverride = require('method-override')
+  , vhost = require('vhost')
   , AuthController = require('./controllers/auth')
   , UserController = require('./controllers/user')
   , ArticleController = require('./controllers/article')
@@ -18,13 +26,19 @@ var express = require('express')
   , dev = app.get('env') === 'development'
   , format = 'YYYY/MM/DD HH:mm:ss';
 
+moment.lang('zh-cn');
+
 var startedAt = moment().format(format);
 
-var RedisStore = require('connect-redis')(express);
+var RedisStore = require('connect-redis')(session);
 
 main.locals.DEV = dev;
 
 main.enable('case sensitive routing');
+main.set('views', __dirname + '/views');
+main.set('view engine', 'jade');
+
+main.use(compress());
 
 // log
 var logFormat = ':remote-addr - - [:date] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" ":req[X-Forwarded-For]"';
@@ -33,19 +47,15 @@ if (dev) {
   Promise.longStackTraces();
   // main.locals.pretty = true;
 }
-main.use(express.logger({
+main.use(logger({
   format: logFormat,
   stream: mainLog
 }));
 
-moment.lang('zh-cn');
+main.use(favicon(__dirname + '/public/favicon.ico'));
 
-main.use(express.compress());
-
-main.use(express.favicon(__dirname + '/public/favicon.ico'));
-
-main.use(express.cookieParser(conf.cookie_secret));
-main.use(express.session({
+main.use(cookieParser(conf.cookie_secret));
+main.use(session({
   key: 'ssid',
   store: new RedisStore({
     client: db,
@@ -54,11 +64,11 @@ main.use(express.session({
   secret: conf.cookie_secret
 }));
 
-// main.use(express.bodyParser());
-main.use(express.json());
-main.use(express.urlencoded());
-// main.use(express.multipart());
-main.use(express.methodOverride());
+main.use(bodyParser.json());
+main.use(bodyParser.urlencoded());
+// main.use(bodyParser.multipart());
+main.use(methodOverride());
+
 // user auth
 main.use(UserController.auth);
 
@@ -73,6 +83,7 @@ main.use(function(req, res, next){
         var data = _.pick(res.locals, ['title', 'nav', 'script', 'datum', 'error']);
         data.html = html;
         // data.originalUrl = req.originalUrl;
+        res.set('Content-Type', 'application/json; charset=utf-8');
         res.send(data);
       });
     } else {
@@ -81,9 +92,6 @@ main.use(function(req, res, next){
   };
   next();
 });
-
-main.set('views', __dirname + '/views');
-main.set('view engine', 'jade');
 
 main.get('/', function(req, res, next){
   ArticleModel.list()
@@ -96,10 +104,20 @@ main.get('/', function(req, res, next){
 });
 
 // 文章
-ArticleController.use(main);
+main.use('/article', ArticleController.index);
+
+// 文章评论
+main.use('/comments', ArticleController.comments);
+
+// Feed
+// main.use('/feed', ArticleController.feed);
+
+// 文章标签
+main.use('/tag', ArticleController.tag);
 
 // 登录/验证
-AuthController.use(main);
+main.use('/auth', AuthController.index);
+main.use('/signout', AuthController.signout);
 
 main.get('/robots.txt', function(req, res){
   res.sendfile(__dirname + '/robots.txt', {
@@ -156,11 +174,11 @@ main.use(errors);
 // 静态文件服务
 var staticServer = express();
 staticServer.enable('case sensitive routing');
-staticServer.use(express.logger({
+staticServer.use(compress());
+staticServer.use(logger({
   format: logFormat,
   stream: staticLog
 }));
-staticServer.use(express.compress());
 // @font-face access control
 staticServer.use(function(req, res, next){
   if (req.headers.origin) {
@@ -184,9 +202,10 @@ wwwServer.all('*', function(req, res){
 });
 
 // app.enable('trust proxy');
-app.use(express.vhost('wangshenwei.com', main));
-app.use(express.vhost('weihub.com', staticServer));
-app.use(express.vhost('www.wangshenwei.com', wwwServer));
+app.use(vhost('wangshenwei.com', main));
+app.use(vhost('weihub.com', staticServer));
+app.use(vhost('www.wangshenwei.com', wwwServer));
+app.use(vhost('127.0.0.1', wwwServer));
 
 app.listen(conf.port, conf.host);
 console.log('[%s] Express started listen on %s:%s, in %s mode',

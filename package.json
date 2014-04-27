@@ -10,17 +10,25 @@
   "author": "weareoutman",
   "readmeFilename": "README.md",
   "dependencies": {
-    "express": "~3.4.7",
+    "express": "^4.0.0",
     "jade": "~1.1.4",
     "underscore": "~1.5.2",
     "redis": "~0.10.0",
     "hiredis": "~0.1.16",
     "request": "~2.31.0",
-    "connect-redis": "~1.4.6",
+    "connect-redis": "^2.0.0",
     "marked": "~0.3.1",
     "highlight.js": "~8.0.0",
     "bluebird": "^1.0.7",
-    "moment": "^2.5.1"
+    "moment": "^2.5.1",
+    "vhost": "^1.0.0",
+    "static-favicon": "^1.0.2",
+    "method-override": "^1.0.0",
+    "cookie-parser": "^1.0.1",
+    "morgan": "^1.0.0",
+    "compression": "^1.0.1",
+    "express-session": "^1.0.3",
+    "body-parser": "^1.0.2"
   },
   "devDependencies": {
     "requirejs": "~2.1.10",
