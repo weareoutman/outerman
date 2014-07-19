@@ -6,10 +6,14 @@ define(function(require, exports, module){
       return;
     }
     wx.on('menu:share:timeline', function(){
+      var image = $('div.article-container').find('img')
+        , s = image.prop('src')
+        , w = image.prop('width')
+        , h = image.prop('height');
       wx.invoke('shareTimeline', {
-        img_url: 'http://weihub.com/images/code.png',
-        img_width: 128,
-        img_height: 128,
+        img_url: s || 'http://weihub.com/images/code.png',
+        img_width: w || 128,
+        img_height: h || 128,
         link: location.toString(),
         title: document.title,
         desc: document.title.replace(' - WangShenwei.com', '')
