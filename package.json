@@ -22,13 +22,16 @@
     "bluebird": "^1.0.7",
     "moment": "^2.5.1",
     "vhost": "^1.0.0",
-    "static-favicon": "^1.0.2",
     "method-override": "^1.0.0",
     "cookie-parser": "^1.0.1",
     "morgan": "^1.0.0",
     "compression": "^1.0.1",
     "express-session": "^1.0.3",
-    "body-parser": "^1.0.2"
+    "body-parser": "^1.0.2",
+    "connect-multiparty": "^1.1.0",
+    "serve-static": "^1.4.1",
+    "serve-favicon": "^2.0.1",
+    "serve-index": "^1.1.4"
   },
   "devDependencies": {
     "requirejs": "~2.1.10",

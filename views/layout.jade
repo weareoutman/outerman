@@ -32,6 +32,10 @@ html
                 a.hijax(href='/comments')
                   span.glyphicon.glyphicon-comment
                   |  评论
+              li(class=nav === 'upload' ? 'active' : '', data-nav='upload')
+                a.hijax(href='/upload')
+                  span.glyphicon.glyphicon-open
+                  |  上传
           ul.nav.navbar-nav.navbar-right
             if user
               li

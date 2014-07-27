@@ -8,11 +8,14 @@ var express = require('express')
   , cookieParser = require('cookie-parser')
   , bodyParser = require('body-parser')
   , session = require('express-session')
-  , favicon = require('static-favicon')
+  , favicon = require('serve-favicon')
+  , serveIndex = require('serve-index')
+  , serveStatic = require('serve-static')
   , methodOverride = require('method-override')
   , vhost = require('vhost')
   , AuthController = require('./controllers/auth')
   , UserController = require('./controllers/user')
+  , UploadController = require('./controllers/upload')
   , ArticleController = require('./controllers/article')
   , ArticleModel = require('./models/article')
   , db = require('./lib/db')
@@ -21,6 +24,8 @@ var express = require('express')
   , conf = require('./config')
   , app = express()
   , main = express()
+  , staticDir = __dirname + '/public'
+  , uploadsDir = __dirname + '/uploads'
   , mainLog = fs.createWriteStream('./log/main.log', {flags: 'a'})
   , staticLog = fs.createWriteStream('./log/static.log', {flags: 'a'})
   , dev = app.get('env') === 'development'
@@ -66,7 +71,6 @@ main.use(session({
 
 main.use(bodyParser.json());
 main.use(bodyParser.urlencoded());
-// main.use(bodyParser.multipart());
 main.use(methodOverride());
 
 // user auth
@@ -108,6 +112,9 @@ main.use('/article', ArticleController.index);
 
 // 文章评论
 main.use('/comments', ArticleController.comments);
+
+// 上传文件
+main.use('/upload', UploadController.index);
 
 // Feed
 // main.use('/feed', ArticleController.feed);
@@ -179,6 +186,7 @@ staticServer.use(logger({
   format: logFormat,
   stream: staticLog
 }));
+
 // @font-face access control
 staticServer.use(function(req, res, next){
   if (req.headers.origin) {
@@ -192,9 +200,15 @@ staticServer.use(function(req, res, next){
   }
   next();
 });
-staticServer.use(express.static(__dirname + '/public', {
+
+var staticConf = {
+  etag: false,
   maxAge: dev ? 0 : 2.592e9 // 30天
-}));
+};
+
+staticServer.use('/uploads', serveIndex(uploadsDir));
+staticServer.use('/uploads', serveStatic(uploadsDir, staticConf));
+staticServer.use(serveStatic(staticDir, staticConf));
 
 var wwwServer = express();
 wwwServer.all('*', function(req, res){

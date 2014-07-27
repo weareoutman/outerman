@@ -1,0 +1,9 @@
+.container
+  .row
+    .col-md-8.col-md-offset-2
+      form#form-upload(role='form', action='/upload', method='post', enctype='multipart/form-data', autocomplete='off')
+        .form-group
+          label(for='input-upload-files') 上传文件
+          input#input-upload-files(name='files', type='file', multiple, required)
+        button#btn-upload.btn.btn-primary(type='submit', data-loading-text='正在上传') 上传
+        a.btn.btn-link(href='http://weihub.com/uploads') 浏览上传文件
