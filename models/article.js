@@ -42,7 +42,7 @@ var Promise = require('bluebird')
   , CommentModel = require('./comment')
   , markedAsync = Promise.promisify(marked)
   , MAX_SUMMARY_LENGTH = 180
-  , regUri = /^[\w\-]+(\,[\w\-]+)*$/
+  , regUri = /^[\w\-]+$/
   , KEYS = {
     CURSOR: 'article:cursor',
     LIST: 'article:list',
