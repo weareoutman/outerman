@@ -21,13 +21,13 @@ define(function(require, exports, module){
       if (! attributes.summary) {
         return 'summary';
       }
-      if (attributes.script && ! /^[\w\-]+$/.test(attributes.uri)) {
+      if (! /^[\w\-]+$/.test(attributes.uri)) {
         return 'uri';
       }
       if (attributes.tags && ! /^[\w\-]+(\,[\w\-]+)*$/.test(attributes.tags)) {
         return 'tags';
       }
-      if (! /^[\w\-]+$/.test(attributes.script)) {
+      if (attributes.script && ! /^[\w\-]+$/.test(attributes.script)) {
         return 'script';
       }
     },
