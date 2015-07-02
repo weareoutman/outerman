@@ -21,7 +21,7 @@ define(function(require, exports, module){
       if (! attributes.summary) {
         return 'summary';
       }
-      if (! /^[\w\-]+$/.test(attributes.uri)) {
+      if (attributes.script && ! /^[\w\-]+$/.test(attributes.uri)) {
         return 'uri';
       }
       if (attributes.tags && ! /^[\w\-]+(\,[\w\-]+)*$/.test(attributes.tags)) {
